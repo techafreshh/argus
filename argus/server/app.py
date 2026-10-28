@@ -1,11 +1,27 @@
 """Walking-skeleton FastAPI app for ARGUS lap 1."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-app = FastAPI(title="ARGUS")
+from argus.store.db import init_db
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
+app = FastAPI(title="ARGUS", lifespan=lifespan)
+
+# Create the database synchronously at import so plain `TestClient(app)`
+# usage (without lifespan) still sees `data/argus.db`; the lifespan hook
+# above covers real server boots.
+init_db()
 
 _STATIC_DIR = Path(__file__).with_name("static")
 _PLACEHOLDER = """<!DOCTYPE html>
