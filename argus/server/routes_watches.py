@@ -12,11 +12,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from argus.analysis.ndvi import fetch_ndvi
+from argus.analysis.sam_client import segment_concept
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
 
 _VEGETATION_HINTS = ("vegetation", "ndvi", "crop", "deforest", "forest")
+
+_SHIP_HINTS = ("ship", "vessel", "boat", "tanker", "cargo", "harbor", "port")
 
 
 class WatchCreate(BaseModel):
@@ -39,6 +42,13 @@ def _is_vegetation(template: str, question: str) -> bool:
     if not text.strip():
         return True
     return any(hint in text for hint in _VEGETATION_HINTS)
+
+
+def _is_ship_presence(template: str, question: str) -> bool:
+    text = f"{template} {question}".lower()
+    if not text.strip():
+        return False
+    return any(hint in text for hint in _SHIP_HINTS)
 
 
 def _region_window(row: Any) -> tuple[str, str]:
@@ -195,4 +205,41 @@ def run_watch(watch_id: str) -> dict:
         "token_usage": receipt["token_usage"],
         "id": receipt["id"],
     }
-    return {"ok": True, "receipts": [entry]}
+    receipts = [entry]
+    if _is_ship_presence(template, question):
+        sam_params: dict[str, Any] = {
+            "noun_phrase": "ship",
+            "region": region,
+            "window": window,
+        }
+        try:
+            sam_result = segment_concept(
+                "ship",
+                {"region": region, "window": window, "width": 1024, "height": 1024},
+            )
+        except Exception as exc:  # noqa: BLE001 - run never raises
+            sam_result = {
+                "boxes": [],
+                "masks_path": "",
+                "source_url": "",
+                "error": str(exc) or "segment_concept failed",
+            }
+        sam_receipt = _insert_receipt(
+            watch_id,
+            "segment_concept",
+            sam_params,
+            str(sam_result.get("source_url", "")),
+            sam_result,
+            plot_path=str(sam_result.get("masks_path", "")),
+        )
+        receipts.append(
+            {
+                "tool": "segment_concept",
+                "source_url": sam_receipt["source_url"],
+                "data_hash": sam_receipt["data_hash"],
+                "plot_path": sam_receipt["plot_path"],
+                "token_usage": sam_receipt["token_usage"],
+                "id": sam_receipt["id"],
+            }
+        )
+    return {"ok": True, "receipts": receipts}
