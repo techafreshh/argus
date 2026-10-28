@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Node
+node_modules/
+web/dist/
+
+# Secrets — never commit
+.env
+.env.*
+*.key
+
+# Factory / OS
+.factory/
+.DS_Store
+
+# Caches (fixture data IS tracked — offline mode depends on it)
+data/cache/
+*.sqlite
+*.sqlite3
+*.db
