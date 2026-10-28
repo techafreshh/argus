@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from argus.server.routes_spend import router as spend_router
+from argus.server.routes_watches import router as watches_router
 from argus.store.db import init_db
 
 
@@ -25,6 +26,7 @@ app = FastAPI(title="ARGUS", lifespan=lifespan)
 init_db()
 
 app.include_router(spend_router)
+app.include_router(watches_router)
 
 _STATIC_DIR = Path(__file__).with_name("static")
 _PLACEHOLDER = """<!DOCTYPE html>
