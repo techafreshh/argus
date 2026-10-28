@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 
 app = FastAPI(title="ARGUS")
 
@@ -13,6 +13,14 @@ _PLACEHOLDER = """<!DOCTYPE html>
 <head><meta charset="utf-8" /><title>ARGUS</title></head>
 <body><h1>ARGUS &mdash; under construction</h1></body>
 </html>"""
+
+
+@app.exception_handler(405)
+async def method_not_allowed_as_not_found(_request: Request, _exc: Exception) -> JSONResponse:
+    # The skeleton exposes no method-specific operations, so a wrong-method
+    # call targets an operation that does not exist: report a uniform 404
+    # (without reading the body, so malformed payloads never hang or 500).
+    return JSONResponse(status_code=404, content={"detail": "Not Found"})
 
 
 @app.get("/healthz")

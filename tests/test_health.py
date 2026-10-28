@@ -29,3 +29,19 @@ def test_root_serves_placeholder() -> None:
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
     assert "under construction" in resp.text
+
+
+def test_malformed_json_post_is_4xx_never_500() -> None:
+    client = _client()
+    for path in ("/healthz", "/api/healthz", "/", "/api/watches"):
+        resp = client.post(
+            path,
+            content=b"{bad json",
+            headers={"Content-Type": "application/json"},
+        )
+        assert resp.status_code in (400, 404, 422), (path, resp.status_code)
+
+
+def test_wrong_method_is_404_not_405() -> None:
+    assert _client().post("/healthz").status_code == 404
+    assert _client().post("/api/healthz").status_code == 404
