@@ -1,0 +1,1 @@
+{"cloud_pct":0.0,"region":"test-aoi","scene_id":"S1A_IW_GRDH_20240115T040000","sensor":"s1","source_url":"https://catalogue.dataspace.copernicus.eu/odt/v1/Products?$filter=Collection/Name%20eq%20SENTINEL-1","synthetic":true,"units":"backscatter-dB","values":[-12.5,-11.8,-13.1,-12.2,-11.5,-12.9,-12.0,-12.4],"window":"2024-01"}
