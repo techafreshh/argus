@@ -43,6 +43,11 @@ TOOL_REGISTRY: dict[str, dict] = {
         "description": "Cross-check independent sources before reporting.",
         "params": {"evidence": "dict"},
     },
+    "segment_concept": {
+        "source": "sam-3.1",
+        "description": "Segment a noun-phrase concept into boxes plus masks.",
+        "params": {"noun_phrase": "str", "image": "str|dict"},
+    },
     "file_report": {
         "source": "report",
         "description": "File the final analyst report for a watch.",
