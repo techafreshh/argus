@@ -270,6 +270,8 @@ The web app builds to a static bundle served by FastAPI — no Node runtime in t
 
 Base URL: `/api` · JSON over HTTP · no auth (MVP).
 
+**Server convention (binding for all laps):** the FastAPI app lives at `argus.server.app:app`, binds the `$PORT` environment variable (default 8000), and starts with `python -m uvicorn argus.server.app:app --host 0.0.0.0 --port $PORT`. `GET /healthz` returns `{"ok": true}` from lap 1 onward.
+
 | Method | Path | Purpose |
 |---|---|---|
 | GET/POST | `/watches` | List / create watch (region + plain-English question + cadence) |
