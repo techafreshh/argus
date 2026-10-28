@@ -1,0 +1,9 @@
+# Runtime + test dependencies (mirrors pyproject.toml).
+# On Debian-style systems with PEP 668 (externally-managed-environment),
+# install with: pip install --break-system-packages -r requirements.txt
+# A virtualenv (python3 -m venv .venv) works without the flag.
+fastapi
+uvicorn
+pytest
+httpx
+ruff
