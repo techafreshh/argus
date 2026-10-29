@@ -25,6 +25,7 @@ def _alert_dict(row: Any) -> dict:
         evidence = json.loads(row["evidence_json"] or "{}")
     except (TypeError, ValueError):
         evidence = {}
+    eye = str(evidence.get("eye", "")) if isinstance(evidence, dict) else ""
     return {
         "id": row["id"],
         "watch_id": row["watch_id"],
@@ -32,6 +33,7 @@ def _alert_dict(row: Any) -> dict:
         "title": row["title"],
         "confidence": float(row["confidence"]),
         "status": row["status"],
+        "eye": eye,
         "evidence": evidence,
         "created_at": row["created_at"],
         "decided_at": row["decided_at"],
