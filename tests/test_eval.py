@@ -64,9 +64,11 @@ def test_enso_status_shape():
     body = _client().get("/api/enso/status").json()
     for key in (
         "oni",
+        "own_oni",
         "noaa_oni",
         "correlation",
         "phase",
+        "phase_id",
         "intensity",
         "trajectory",
         "analogs",
@@ -74,7 +76,9 @@ def test_enso_status_shape():
     ):
         assert key in body, key
     assert body["correlation"] >= 0.99
-    assert body["phase"] in ("el_nino", "la_nina", "neutral")
+    assert body["phase"] in ("El Nino", "La Nina", "Neutral")
+    assert body["phase_id"] in ("el_nino", "la_nina", "neutral")
+    assert body["oni"] == body["own_oni"]
     assert len(body["analogs"]) == 3
 
 
