@@ -1,0 +1,1 @@
+{"cloud_pct":12.5,"region":"test-aoi","scene_id":"S2A_T37MCS_20240115T073211","sensor":"s2","source_url":"https://catalogue.dataspace.copernicus.eu/odt/v1/Products?$filter=Collection/Name%20eq%20SENTINEL-2","synthetic":true,"units":"reflectance","values":[0.42,0.45,0.44,0.46,0.43,0.47,0.45,0.44],"window":"2024-01"}

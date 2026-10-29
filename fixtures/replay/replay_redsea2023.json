@@ -1,0 +1,12 @@
+{
+  "id": "redsea2023",
+  "inputs": {
+    "region": "red_sea",
+    "window": "2023-10"
+  },
+  "expected": {
+    "event_present": true,
+    "region": "red_sea",
+    "window": "2023-10"
+  }
+}

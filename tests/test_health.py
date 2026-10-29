@@ -28,7 +28,7 @@ def test_root_serves_placeholder() -> None:
     resp = _client().get("/")
     assert resp.status_code == 200
     assert "text/html" in resp.headers["content-type"]
-    assert "under construction" in resp.text
+    assert "ARGUS" in resp.text
 
 
 def test_malformed_json_post_is_4xx_never_500() -> None:

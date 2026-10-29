@@ -2,6 +2,7 @@
 # On Debian-style systems with PEP 668 (externally-managed-environment),
 # install with: pip install --break-system-packages -r requirements.txt
 # A virtualenv (python3 -m venv .venv) works without the flag.
+apscheduler
 fastapi
 uvicorn
 pytest
