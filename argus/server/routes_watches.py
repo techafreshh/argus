@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -31,6 +32,13 @@ _SHIP_HINTS = ("ship", "vessel", "boat", "tanker", "cargo", "harbor", "port")
 _FIRE_HINTS = ("fire", "burn", "wildfire")
 
 _CADENCES = ("daily", "weekly")
+
+_OFFLINE_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def _is_offline() -> bool:
+    """True when ARGUS_OFFLINE requests fixture-only behaviour."""
+    return os.environ.get("ARGUS_OFFLINE", "").strip().lower() in _OFFLINE_TRUTHY
 
 
 class RegionIn(BaseModel):
@@ -141,12 +149,15 @@ def _insert_receipt(
     payload: dict,
     plot_path: str = "",
 ) -> dict:
+    stamped = dict(params or {})
+    stamped["offline"] = _is_offline()
     receipt = {
         "id": uuid.uuid4().hex,
         "watch_id": watch_id,
         "acquisition_id": None,
         "tool": tool,
-        "params_json": json.dumps(params, sort_keys=True, default=str),
+        "offline": stamped["offline"],
+        "params_json": json.dumps(stamped, sort_keys=True, default=str),
         "source_url": source_url,
         "data_hash": hashlib.sha256(
             json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
@@ -257,6 +268,7 @@ def _receipt_dict(row: Any) -> dict:
         "tool": row["tool"],
         "params_json": row["params_json"],
         "params": params,
+        "offline": bool(params.get("offline", False)),
         "source_url": row["source_url"],
         "data_hash": row["data_hash"],
         "plot_path": row["plot_path"],
@@ -386,6 +398,7 @@ def run_watch(watch_id: str) -> dict:
     template = str(row["template"] or "")
     question = str(row["question"] or "")
     region, window = _region_window(row)
+    offline = _is_offline()
     try:
         loop_result = loop_run_watch(watch_id)
     except LookupError:
@@ -396,6 +409,7 @@ def run_watch(watch_id: str) -> dict:
         return {
             "ok": False,
             "error": fallback["error"],
+            "offline": offline,
             "receipt_id": receipt["id"],
             "acquisition_id": receipt["acquisition_id"],
             "receipts": [receipt],
@@ -415,6 +429,7 @@ def run_watch(watch_id: str) -> dict:
             {
                 "id": loop_row["id"],
                 "tool": loop_row["tool"],
+                "offline": offline,
                 "source_url": loop_row["source_url"],
                 "data_hash": loop_row["data_hash"],
                 "plot_path": loop_row["plot_path"],
@@ -432,6 +447,7 @@ def run_watch(watch_id: str) -> dict:
                 {
                     "id": receipt["id"],
                     "tool": "fire_anomaly",
+                    "offline": offline,
                     "source_url": receipt["source_url"],
                     "data_hash": receipt["data_hash"],
                     "plot_path": receipt["plot_path"],
@@ -441,6 +457,7 @@ def run_watch(watch_id: str) -> dict:
             return {
                 "ok": False,
                 "error": error["error"],
+                "offline": offline,
                 "receipt_id": loop_result["receipt_id"],
                 "acquisition_id": loop_result["acquisition_id"],
                 "receipts": receipts,
@@ -456,6 +473,7 @@ def run_watch(watch_id: str) -> dict:
             {
                 "id": summary["id"],
                 "tool": "fire_anomaly",
+                "offline": offline,
                 "source_url": summary["source_url"],
                 "data_hash": summary["data_hash"],
                 "plot_path": summary["plot_path"],
@@ -475,6 +493,7 @@ def run_watch(watch_id: str) -> dict:
             conn.close()
         return {
             "ok": True,
+            "offline": offline,
             "receipt_id": loop_result["receipt_id"],
             "acquisition_id": loop_result["acquisition_id"],
             "receipts": receipts,
@@ -493,6 +512,7 @@ def run_watch(watch_id: str) -> dict:
             {
                 "id": receipt["id"],
                 "tool": "fetch_ndvi",
+                "offline": offline,
                 "source_url": receipt["source_url"],
                 "data_hash": receipt["data_hash"],
                 "plot_path": receipt["plot_path"],
@@ -502,6 +522,7 @@ def run_watch(watch_id: str) -> dict:
         return {
             "ok": False,
             "error": error["error"],
+            "offline": offline,
             "receipt_id": loop_result["receipt_id"],
             "acquisition_id": loop_result["acquisition_id"],
             "receipts": receipts,
@@ -518,6 +539,7 @@ def run_watch(watch_id: str) -> dict:
         {
             "id": receipt["id"],
             "tool": "fetch_ndvi",
+            "offline": offline,
             "source_url": receipt["source_url"],
             "data_hash": receipt["data_hash"],
             "plot_path": receipt["plot_path"],
@@ -554,6 +576,7 @@ def run_watch(watch_id: str) -> dict:
             {
                 "id": sam_receipt["id"],
                 "tool": "segment_concept",
+                "offline": offline,
                 "source_url": sam_receipt["source_url"],
                 "data_hash": sam_receipt["data_hash"],
                 "plot_path": sam_receipt["plot_path"],
@@ -584,6 +607,7 @@ def run_watch(watch_id: str) -> dict:
         conn.close()
     return {
         "ok": True,
+        "offline": offline,
         "receipt_id": loop_result["receipt_id"],
         "acquisition_id": loop_result["acquisition_id"],
         "receipts": receipts,

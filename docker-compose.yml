@@ -1,0 +1,23 @@
+# Single-service deploy: `api` serves the HTTP API on $PORT, the static
+# control-room bundle, and the cron scheduler, which is the in-process
+# APScheduler started by argus.server.app lifespan -> start_scheduler (60s tick).
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: ${PORT:-8000}
+      ARGUS_OFFLINE: ${ARGUS_OFFLINE:-0}
+      ARGUS_DB_PATH: ${ARGUS_DB_PATH:-data/argus.db}
+    volumes:
+      - data:/app/data
+    restart: unless-stopped
+
+volumes:
+  data:
