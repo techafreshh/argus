@@ -168,6 +168,48 @@ def _insert_receipt(
     return receipt
 
 
+def _insert_alert(
+    watch_id: str,
+    title: str,
+    confidence: float,
+    evidence: dict,
+) -> dict:
+    alert = {
+        "id": uuid.uuid4().hex,
+        "watch_id": watch_id,
+        "report_id": None,
+        "title": title,
+        "confidence": confidence,
+        "status": "queued",
+        "evidence_json": json.dumps(evidence, sort_keys=True, default=str),
+        "created_at": _utcnow(),
+        "decided_at": None,
+    }
+    conn = get_connection()
+    try:
+        conn.execute(
+            "INSERT INTO alerts "
+            "(id, watch_id, report_id, title, confidence, status, "
+            "evidence_json, created_at, decided_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+            (
+                alert["id"],
+                alert["watch_id"],
+                alert["report_id"],
+                alert["title"],
+                alert["confidence"],
+                alert["status"],
+                alert["evidence_json"],
+                alert["created_at"],
+                alert["decided_at"],
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return alert
+
+
 def _watch_dict(row: Any) -> dict:
     try:
         region = json.loads(row["region_json"] or "{}")
@@ -433,11 +475,35 @@ def run_watch(watch_id: str) -> dict:
                 "token_usage": sam_receipt["token_usage"],
             }
         )
+    try:
+        z = float(result.get("z_score", 0.0))
+    except (TypeError, ValueError):
+        z = 0.0
+    if not math.isfinite(z):
+        z = 0.0
+    title = str(row["name"] or row["question"] or "watch alert")
+    alert = _insert_alert(
+        watch_id,
+        title,
+        min(0.99, abs(z) / 5.0),
+        {"receipt_id": receipt["id"], "z_score": z},
+    )
+    conn = get_connection()
+    try:
+        conn.execute(
+            "UPDATE watches SET updated_at = ? WHERE id = ?;",
+            (_utcnow(), watch_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
     return {
         "ok": True,
         "receipt_id": loop_result["receipt_id"],
         "acquisition_id": loop_result["acquisition_id"],
         "receipts": receipts,
+        "alert_id": alert["id"],
+        "alert_status": alert["status"],
     }
 
 
