@@ -10,11 +10,16 @@ eval-lap aliases (``oni``, snake_case ``phase_id``, ``analogs``,
 from fastapi import APIRouter
 
 from argus.eval.oni import SUBWATCHERS, find_analogs
+from argus.eyes.elvigia.analog import current_vector_for as _current_vector_for
+from argus.eyes.elvigia.analog import find_analogs as _elvigia_analogs
+from argus.eyes.elvigia.analog import latest_state as _latest_state
 from argus.eyes.elvigia.oni import (
     compute_oni,
     load_noaa_table,
     validate_against_noaa,
 )
+from argus.eyes.elvigia.selfcheck import self_check as _self_check
+from argus.eyes.elvigia.subwatchers import for_phase as _watchers_for_phase
 
 router = APIRouter()
 
@@ -33,6 +38,18 @@ _PHASE_IDS = {
 
 def _analogs(months: list[str], oni: list) -> list[dict]:
     """Top-3 analog windows over the cleaned own-ONI history."""
+    try:
+        label = months[-1] if months else ""
+        vector = _current_vector_for(label) if label else None
+        if vector is None:
+            latest = _latest_state()
+            vector = list(latest["vector"]) if latest else None
+        if vector is not None:
+            hits = _elvigia_analogs(vector, k=3)
+            if len(hits) == 3:
+                return hits
+    except Exception:  # noqa: BLE001, S110 - fall through to the eval engine
+        pass
     clean = [(m, float(v)) for m, v in zip(months, oni) if v is not None]
     if not clean:
         return []
@@ -40,6 +57,46 @@ def _analogs(months: list[str], oni: list) -> list[dict]:
     hist = [v for _, v in clean]
     state = hist[-12:] if len(hist) >= 12 else list(hist)
     return find_analogs(state, history=hist, months=hist_months)
+
+
+def _subwatchers(phase: str, phase_id: str) -> list[dict]:
+    """Phase-keyed watchers: elvigia table first, eval table fallback."""
+    try:
+        watchers = _watchers_for_phase(phase)
+        if len(watchers) >= 2:
+            return watchers
+    except Exception:  # noqa: BLE001, S110 - fall through to the eval table
+        pass
+    fallback = [dict(entry) for entry in SUBWATCHERS.get(phase_id, [])]
+    if len(fallback) < 2:
+        fallback += [
+            dict(entry)
+            for entry in SUBWATCHERS.get("neutral", [])
+            if entry not in fallback
+        ]
+    return fallback
+
+
+def _selfcheck(phase: str, month: str) -> dict:
+    """CHIRPS confirm/refute rail; inconclusive when fixtures are missing."""
+    try:
+        expected = "dry" if phase == "El Nino" else "wet"
+        return _self_check(
+            region="southern_africa",
+            expected=expected,
+            window=month or "2023-01",
+        )
+    except Exception:  # noqa: BLE001 - self-check never breaks status
+        return {
+            "region": "southern_africa",
+            "window": month or "2023-01",
+            "expected": "dry",
+            "analog_year": None,
+            "verdict": "inconclusive",
+            "observed_anomaly": 0.0,
+            "observed_mean": None,
+            "divergence": False,
+        }
 
 
 def _build_status() -> dict:
@@ -73,7 +130,8 @@ def _build_status() -> dict:
         "trajectory": result["trajectory"],
         "month": months[-1] if months else "",
         "analogs": _analogs(months, result["oni"]),
-        "subwatchers": [dict(entry) for entry in SUBWATCHERS.get(phase_id, [])],
+        "subwatchers": _subwatchers(phase, phase_id),
+        "selfcheck": _selfcheck(phase, months[-1] if months else ""),
     }
 
 
@@ -98,7 +156,17 @@ def _safe_status() -> dict:
                 {"month": "", "year": 0, "similarity": 0.0, "distance": 0.0}
                 for _ in range(3)
             ],
-            "subwatchers": [dict(entry) for entry in SUBWATCHERS.get("neutral", [])],
+            "subwatchers": _subwatchers("Neutral", "neutral"),
+            "selfcheck": {
+                "region": "southern_africa",
+                "window": "",
+                "expected": "dry",
+                "analog_year": None,
+                "verdict": "inconclusive",
+                "observed_anomaly": 0.0,
+                "observed_mean": None,
+                "divergence": False,
+            },
         }
 
 
