@@ -7,6 +7,8 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from argus.scheduler.cadence import start_scheduler, stop_scheduler
+from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
 from argus.server.routes_spend import router as spend_router
 from argus.server.routes_watches import router as watches_router
@@ -16,7 +18,11 @@ from argus.store.db import init_db
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     init_db()
-    yield
+    start_scheduler()
+    try:
+        yield
+    finally:
+        stop_scheduler()
 
 
 app = FastAPI(title="ARGUS", lifespan=lifespan)
@@ -29,6 +35,7 @@ init_db()
 app.include_router(spend_router)
 app.include_router(watches_router)
 app.include_router(ask_router)
+app.include_router(alerts_router)
 
 _STATIC_DIR = Path(__file__).with_name("static")
 _PLACEHOLDER = """<!DOCTYPE html>
