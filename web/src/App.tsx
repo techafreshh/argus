@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import AnalogTimeline from "./panels/AnalogTimeline";
@@ -271,6 +271,8 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
   );
 }
 
+const ChatPanel = lazy(() => import("./chat/ChatPanel"));
+
 export default function App() {
   const [watches, setWatches] = useState<Watch[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
@@ -315,6 +317,9 @@ export default function App() {
         </ul>
       </section>
       <AlertFeed reloadKey={reloadKey} />
+      <Suspense fallback={null}>
+        <ChatPanel />
+      </Suspense>
       <ReceiptsPanel />
       <ReportsView />
       <SpendEvalPanel />
