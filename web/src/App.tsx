@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import AnalogTimeline from "./panels/AnalogTimeline";
+import ReceiptsPanel from "./panels/ReceiptsPanel";
+import ReportsView from "./panels/ReportsView";
+import SpendEvalPanel from "./panels/SpendEvalPanel";
 import {
   ENSO_FIXTURE,
   SUB_WATCHERS,
@@ -311,6 +315,10 @@ export default function App() {
         </ul>
       </section>
       <AlertFeed reloadKey={reloadKey} />
+      <ReceiptsPanel />
+      <ReportsView />
+      <SpendEvalPanel />
+      <AnalogTimeline />
     </main>
   );
 }

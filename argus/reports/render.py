@@ -80,6 +80,8 @@ def file_report(alert: dict, receipts: list[dict]) -> dict:
         "confidence": confidence,
         "before_url": before_url,
         "after_url": after_url,
+        "before_path": before_url,
+        "after_path": after_url,
         "sources": sources,
         "receipts": receipts,
     }
