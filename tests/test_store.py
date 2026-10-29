@@ -14,6 +14,7 @@ EXPECTED_TABLES = {
     "alerts",
     "predictions",
     "meta_spend",
+    "reports",
 }
 
 
@@ -32,11 +33,11 @@ def _tables(path: Path) -> set[str]:
         conn.close()
 
 
-def test_schema_version_is_one() -> None:
-    assert SCHEMA_VERSION == 1
+def test_schema_version_is_two() -> None:
+    assert SCHEMA_VERSION == 2
 
 
-def test_init_creates_all_six_tables(tmp_path: Path) -> None:
+def test_init_creates_all_tables(tmp_path: Path) -> None:
     db = tmp_path / "argus.db"
     init_db(db)
     assert EXPECTED_TABLES <= _tables(db)

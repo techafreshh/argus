@@ -227,16 +227,28 @@ def _watch_dict(row: Any) -> dict:
 
 
 def _receipt_dict(row: Any) -> dict:
+    try:
+        params = json.loads(row["params_json"] or "{}")
+    except (TypeError, ValueError):
+        params = {}
+    if not isinstance(params, dict):
+        params = {}
+    try:
+        tokens = int(row["token_usage"])
+    except (TypeError, ValueError):
+        tokens = 0
     return {
         "id": row["id"],
         "watch_id": row["watch_id"],
         "acquisition_id": row["acquisition_id"],
         "tool": row["tool"],
         "params_json": row["params_json"],
+        "params": params,
         "source_url": row["source_url"],
         "data_hash": row["data_hash"],
         "plot_path": row["plot_path"],
         "token_usage": int(row["token_usage"]),
+        "tokens": tokens,
         "created_at": row["created_at"],
     }
 
