@@ -17,6 +17,7 @@ from argus.analysis.sam_client import segment_concept
 from argus.orchestrator.loop import run_watch as loop_run_watch
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.planner import match_template
+from argus.orchestrator.router import route as route_question
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -217,7 +218,10 @@ def _get_watch_or_404(watch_id: str) -> Any:
 def create_watch(payload: WatchIn, response: Response) -> dict:
     """Create a watch; stores the matched template plus the initial Plan."""
     init_db()
-    template = (payload.template or "").strip() or match_template(payload.question)
+    template = (payload.template or "").strip() or (
+        route_question(payload.question).get("template")
+        or match_template(payload.question)
+    )
     if payload.region is not None:
         region: dict[str, Any] = {
             "type": payload.region.type,
