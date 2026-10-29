@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -13,6 +14,13 @@ from argus.orchestrator.meta_client import plan as make_plan
 from argus.store.db import get_connection
 
 _DEFAULT_PARAMS = {"region": "nino34", "window": "2023-01"}
+
+_OFFLINE_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def _is_offline() -> bool:
+    """True when ARGUS_OFFLINE requests fixture-only behaviour."""
+    return os.environ.get("ARGUS_OFFLINE", "").strip().lower() in _OFFLINE_TRUTHY
 
 
 def _utcnow() -> str:
@@ -68,6 +76,7 @@ def run_watch(watch_id: str) -> dict:
         fetch_fn = oisst.fetch
 
     params: dict[str, Any] = dict(_DEFAULT_PARAMS)
+    params["offline"] = _is_offline()
     try:
         payload = fetch_fn(params)
         if not isinstance(payload, dict):
