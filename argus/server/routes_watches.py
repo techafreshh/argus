@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from argus.analysis.ndvi import fetch_ndvi
 from argus.analysis.sam_client import segment_concept
+from argus.eyes.fireline.alert import file_fire_alert
+from argus.eyes.fireline.anomaly import anomaly as fire_anomaly
 from argus.orchestrator.loop import run_watch as loop_run_watch
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.planner import match_template
@@ -25,6 +27,8 @@ router = APIRouter()
 _VEGETATION_HINTS = ("vegetation", "ndvi", "crop", "deforest", "forest")
 
 _SHIP_HINTS = ("ship", "vessel", "boat", "tanker", "cargo", "harbor", "port")
+
+_FIRE_HINTS = ("fire", "burn", "wildfire")
 
 _CADENCES = ("daily", "weekly")
 
@@ -90,6 +94,15 @@ def _is_ship_presence(template: str, question: str) -> bool:
     if not text.strip():
         return False
     return any(hint in text for hint in _SHIP_HINTS)
+
+
+def _is_fire(template: str, question: str) -> bool:
+    text = f"{template} {question}".lower()
+    if "fire_anomaly" in text or "fire_watch" in text:
+        return True
+    if not text.strip():
+        return False
+    return any(hint in text for hint in _FIRE_HINTS)
 
 
 def _region_window(row: Any) -> tuple[str, str]:
@@ -408,6 +421,66 @@ def run_watch(watch_id: str) -> dict:
                 "token_usage": int(loop_row["token_usage"]),
             }
         )
+    if _is_fire(template, question):
+        fire_params: dict[str, Any] = {"region": region, "window": window}
+        try:
+            fire_result = fire_anomaly(fire_params)
+        except Exception as exc:  # noqa: BLE001 - run never raises into the route layer
+            error: dict[str, Any] = {"error": str(exc) or "fire anomaly failed"}
+            receipt = _insert_receipt(watch_id, "fire_anomaly", fire_params, "", error)
+            receipts.append(
+                {
+                    "id": receipt["id"],
+                    "tool": "fire_anomaly",
+                    "source_url": receipt["source_url"],
+                    "data_hash": receipt["data_hash"],
+                    "plot_path": receipt["plot_path"],
+                    "token_usage": receipt["token_usage"],
+                }
+            )
+            return {
+                "ok": False,
+                "error": error["error"],
+                "receipt_id": loop_result["receipt_id"],
+                "acquisition_id": loop_result["acquisition_id"],
+                "receipts": receipts,
+            }
+        summary = _insert_receipt(
+            watch_id,
+            "fire_anomaly",
+            fire_params,
+            str(fire_result.get("before_url", "")),
+            fire_result,
+        )
+        receipts.append(
+            {
+                "id": summary["id"],
+                "tool": "fire_anomaly",
+                "source_url": summary["source_url"],
+                "data_hash": summary["data_hash"],
+                "plot_path": summary["plot_path"],
+                "token_usage": summary["token_usage"],
+            }
+        )
+        title = str(row["name"] or row["question"] or "watch alert")
+        alert = file_fire_alert(watch_id, fire_result, title)
+        conn = get_connection()
+        try:
+            conn.execute(
+                "UPDATE watches SET updated_at = ? WHERE id = ?;",
+                (_utcnow(), watch_id),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+        return {
+            "ok": True,
+            "receipt_id": loop_result["receipt_id"],
+            "acquisition_id": loop_result["acquisition_id"],
+            "receipts": receipts,
+            "alert_id": alert["id"],
+            "alert_status": alert["status"],
+        }
     params: dict[str, Any] = {"region": region, "window": window, "aoi": region}
     if not _is_vegetation(template, question):
         params["template"] = "vegetation"
