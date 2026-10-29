@@ -1,0 +1,13 @@
+{
+  "id": "2023",
+  "inputs": {
+    "region": "nino34",
+    "window": "2023-11"
+  },
+  "expected": {
+    "phase": "el_nino",
+    "oni": 2.0,
+    "analog": "2006-11",
+    "analog_year": 2006
+  }
+}

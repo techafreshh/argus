@@ -12,6 +12,7 @@ from argus.scheduler.cadence import start_scheduler, stop_scheduler
 from argus.server.routes_agui import router as agui_router
 from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
+from argus.server.routes_enso import router as enso_router
 from argus.server.routes_eval import router as eval_router
 from argus.server.routes_reports import router as reports_router
 from argus.server.routes_spend import router as spend_router
@@ -45,6 +46,7 @@ app.include_router(alerts_router)
 app.include_router(agui_router)
 app.include_router(reports_router)
 app.include_router(eval_router)
+app.include_router(enso_router)
 
 _STATIC_DIR = Path(__file__).with_name("static")
 _ASSETS_DIR = _STATIC_DIR / "assets"
