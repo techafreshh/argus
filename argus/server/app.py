@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from argus.scheduler.cadence import start_scheduler, stop_scheduler
 from argus.server.routes_alerts import router as alerts_router
@@ -42,11 +43,16 @@ app.include_router(alerts_router)
 app.include_router(reports_router)
 
 _STATIC_DIR = Path(__file__).with_name("static")
+_ASSETS_DIR = _STATIC_DIR / "assets"
 _PLACEHOLDER = """<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8" /><title>ARGUS</title></head>
 <body><h1>ARGUS &mdash; under construction</h1></body>
 </html>"""
+
+
+if _ASSETS_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=_ASSETS_DIR, html=False), name="assets")
 
 
 @app.exception_handler(405)
