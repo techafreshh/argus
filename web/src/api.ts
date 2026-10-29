@@ -75,6 +75,51 @@ async function checked<T>(res: Response): Promise<T> {
   return body;
 }
 
+export interface SpendCall {
+  id: string;
+  operation: string;
+  model: string;
+  tokens_in: number;
+  tokens_out: number;
+  cost_credits: number;
+  created_at: string;
+}
+
+export interface SpendLedger {
+  total_credits: number;
+  calls: SpendCall[];
+}
+
+export interface ReportCard {
+  id: string;
+  watch_id: string;
+  alert_id: string;
+  headline: string;
+  hectares: number;
+  counts: Record<string, unknown>;
+  confidence: number;
+  before_url: string;
+  after_url: string;
+  before_path: string;
+  after_path: string;
+  sources: string[];
+  receipts: Receipt[];
+}
+
+export interface EvalStatus {
+  hits: number;
+  misses: number;
+  total: number;
+  precision: number;
+  total_credits: number;
+  probes: {
+    replay: unknown[];
+    false_positive: unknown[];
+    novel_question: unknown[];
+    status: string;
+  };
+}
+
 export async function previewTemplate(
   question: string,
   region: Record<string, unknown>,
@@ -120,6 +165,21 @@ export async function rejectAlert(id: string): Promise<{ ok: boolean; status: st
 export async function listReceipts(watchId: string): Promise<Receipt[]> {
   const res = await fetch(`/api/watches/${watchId}/receipts`);
   return checked<Receipt[]>(res);
+}
+
+export async function getSpend(): Promise<SpendLedger> {
+  const res = await fetch("/api/spend");
+  return checked<SpendLedger>(res);
+}
+
+export async function getReport(id: string): Promise<ReportCard> {
+  const res = await fetch(`/api/reports/${id}`);
+  return checked<ReportCard>(res);
+}
+
+export async function getEvalStatus(): Promise<EvalStatus> {
+  const res = await fetch("/api/eval/status");
+  return checked<EvalStatus>(res);
 }
 
 /** Static in-bundle fixture: ENSO badge + sub-watcher chips (no live backend). */
