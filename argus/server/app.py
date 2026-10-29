@@ -9,6 +9,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from argus.scheduler.cadence import start_scheduler, stop_scheduler
+from argus.server.routes_agui import router as agui_router
 from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
 from argus.server.routes_eval import router as eval_router
@@ -41,6 +42,7 @@ app.include_router(watches_router)
 app.include_router(verify_router)
 app.include_router(ask_router)
 app.include_router(alerts_router)
+app.include_router(agui_router)
 app.include_router(reports_router)
 app.include_router(eval_router)
 
