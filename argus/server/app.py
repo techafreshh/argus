@@ -12,6 +12,7 @@ from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
 from argus.server.routes_reports import router as reports_router
 from argus.server.routes_spend import router as spend_router
+from argus.server.routes_verify import router as verify_router
 from argus.server.routes_watches import router as watches_router
 from argus.store.db import init_db
 
@@ -35,6 +36,7 @@ init_db()
 
 app.include_router(spend_router)
 app.include_router(watches_router)
+app.include_router(verify_router)
 app.include_router(ask_router)
 app.include_router(alerts_router)
 app.include_router(reports_router)
