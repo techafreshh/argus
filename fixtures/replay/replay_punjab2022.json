@@ -1,0 +1,12 @@
+{
+  "id": "punjab2022",
+  "inputs": {
+    "region": "punjab",
+    "window": "2022-06"
+  },
+  "expected": {
+    "heat_anomaly_present": true,
+    "region": "punjab",
+    "window": "2022-06"
+  }
+}

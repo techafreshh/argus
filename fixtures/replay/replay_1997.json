@@ -1,0 +1,13 @@
+{
+  "id": "1997",
+  "inputs": {
+    "region": "nino34",
+    "window": "1997-11"
+  },
+  "expected": {
+    "phase": "el_nino",
+    "oni": 2.3,
+    "analog": "2015-11",
+    "analog_year": 2015
+  }
+}
