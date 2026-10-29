@@ -43,6 +43,16 @@ TOOL_REGISTRY: dict[str, dict] = {
         "description": "Cross-check independent sources before reporting.",
         "params": {"evidence": "dict"},
     },
+    "search_news": {
+        "source": "gdelt",
+        "description": "Search news articles for an AOI and window.",
+        "params": {"aoi": "dict", "window": "dict"},
+    },
+    "fetch_context": {
+        "source": "osm-wikidata",
+        "description": "Fetch ground context for an AOI and window.",
+        "params": {"aoi": "dict", "window": "dict"},
+    },
     "segment_concept": {
         "source": "sam-3.1",
         "description": "Segment a noun-phrase concept into boxes plus masks.",
