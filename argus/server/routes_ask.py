@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -21,6 +22,7 @@ router = APIRouter()
 class AskIn(BaseModel):
     question: str | None = ""
     region: dict[str, Any] | None = None
+    bbox: list[Any] | None = None
     cadence: str = "daily"
 
     model_config = {"extra": "allow"}
@@ -38,6 +40,21 @@ class AskIn(BaseModel):
         if value is None or (isinstance(value, str) and not value.strip()):
             return "daily"
         return str(value)
+
+    @field_validator("bbox", mode="before")
+    @classmethod
+    def _coerce_bbox(cls, value: Any) -> list[float] | None:
+        # Top-level bbox is convenience sugar; anything malformed is
+        # ignored (never a 422/500) and the router falls back to region.
+        if value is None:
+            return None
+        try:
+            coords = [float(v) for v in list(value)]
+        except (TypeError, ValueError):
+            return None
+        if len(coords) != 4 or any(not math.isfinite(v) for v in coords):
+            return None
+        return coords
 
 
 def _utcnow() -> str:
@@ -132,6 +149,8 @@ def ask(payload: AskIn) -> dict:
         init_db()
         question = str(payload.question or "")
         region = dict(payload.region or {})
+        if not region and payload.bbox:
+            region = {"type": "bbox", "coords": list(payload.bbox)}
         cadence = str(payload.cadence or "daily")
         if not question.strip():
             watch_id = _insert_watch(question, "unrouted", region, cadence)
