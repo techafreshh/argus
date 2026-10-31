@@ -12,6 +12,8 @@
   --border: #1c2942;
   --accent: #22d3ee;
   --destructive: #f87171;
+  --sst-cool: #22d3ee;
+  --sst-warm: #fbbf24;
 
   --beui-background: var(--background);
   --beui-foreground: var(--foreground);
@@ -211,6 +213,62 @@ body {
 .beui-globe-wrap canvas {
   width: 100%;
   display: block;
+}
+
+.sst-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sst-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sst-controls input[type="range"] {
+  flex: 1;
+  min-width: 160px;
+  accent-color: var(--sst-cool);
+}
+
+.sst-controls button {
+  background: #101b31;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.sst-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sst-legend-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--sst-cool),
+    var(--card) 50%,
+    var(--sst-warm)
+  );
+}
+
+.sst-legend-cool {
+  color: var(--sst-cool);
+}
+
+.sst-legend-warm {
+  color: var(--sst-warm);
 }
 
 .beui-toggle {

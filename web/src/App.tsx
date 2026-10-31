@@ -1,7 +1,6 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import AnalogTimeline from "./panels/AnalogTimeline";
+import SstGlobe from "./panels/SstGlobe";
 import ReceiptsPanel from "./panels/ReceiptsPanel";
 import ReportsView from "./panels/ReportsView";
 import SpendEvalPanel from "./panels/SpendEvalPanel";
@@ -33,98 +32,11 @@ import {
 
 const BLANK = { minLon: "24", minLat: "-12.5", maxLon: "30", maxLat: "-8" };
 
-function SstCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    let frame = 0;
-    let alive = true;
-    const W = (canvas.width = 480);
-    const H = (canvas.height = 220);
-    const draw = () => {
-      if (!alive) return;
-      frame += 1;
-      const img = ctx.createImageData(W, H);
-      for (let y = 0; y < H; y++) {
-        for (let x = 0; x < W; x++) {
-          const i = (y * W + x) * 4;
-          const wave =
-            Math.sin((x / W) * Math.PI * 4 + frame / 12) *
-            Math.cos((y / H) * Math.PI * 3 + frame / 20);
-          const v = Math.max(0, Math.min(1, 0.5 + wave * 0.35 + (y / H - 0.5) * 0.4));
-          img.data[i] = Math.round(40 + v * 200);
-          img.data[i + 1] = Math.round(90 + v * 90);
-          img.data[i + 2] = Math.round(200 - v * 130);
-          img.data[i + 3] = 255;
-        }
-      }
-      ctx.putImageData(img, 0, 0);
-      requestAnimationFrame(draw);
-    };
-    draw();
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return <canvas ref={ref} aria-label="SST animation" style={{ width: "100%", display: "block" }} />;
-}
-
 function GlobeView() {
-  const divRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = divRef.current;
-    if (!el) return;
-    let map: maplibregl.Map | null = null;
-    try {
-      // Dark raster basemap so the room reads "online"; tiles load in the
-      // viewer's browser, and offline they simply fail to paint (blank dark
-      // globe — the same look as the old empty style, so nothing breaks).
-      map = new maplibregl.Map({
-        container: el,
-        style: {
-          version: 8,
-          sources: {
-            basemap: {
-              type: "raster",
-              // Esri World Dark Gray Base: keyless, dark-theme native.
-              tiles: [
-                "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-              ],
-              tileSize: 256,
-              maxzoom: 16,
-              attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
-            },
-          },
-          layers: [{ id: "basemap", type: "raster", source: "basemap" }],
-        },
-        center: [20, 0],
-        zoom: 1.2,
-      });
-      const globe = { type: "globe" as const };
-      try {
-        (map as unknown as { setProjection(p: unknown): void }).setProjection(globe);
-      } catch {
-        /* older renderers ignore globe projection */
-      }
-    } catch {
-      /* WebGL unavailable in headless probes: canvas fallback below still shows */
-    }
-    return () => {
-      try {
-        map?.remove();
-      } catch {
-        /* noop */
-      }
-    };
-  }, []);
   return (
     <section aria-label="globe">
       <h2>Globe</h2>
-      <div ref={divRef} data-testid="globe-map" style={{ height: 260 }} />
-      <SstCanvas />
+      <SstGlobe />
     </section>
   );
 }
