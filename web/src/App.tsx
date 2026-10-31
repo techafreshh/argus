@@ -5,6 +5,8 @@ import AnalogTimeline from "./panels/AnalogTimeline";
 import ReceiptsPanel from "./panels/ReceiptsPanel";
 import ReportsView from "./panels/ReportsView";
 import SpendEvalPanel from "./panels/SpendEvalPanel";
+import CommandPalette from "./palette/CommandPalette";
+import "./palette/palette.css";
 import {
   AnimatedBadge,
   AnimatedSidebar,
@@ -117,6 +119,7 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
   const [cadence, setCadence] = useState("daily");
   const [preview, setPreview] = useState<AskPreview | null>(null);
   const [status, setStatus] = useState("");
+  const [heatUp, setHeatUp] = useState(false);
 
   const coords = () => [
     Number(bbox.minLon),
@@ -155,10 +158,16 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
   };
 
   return (
-    <section aria-label="watchlist">
+    <section aria-label="watchlist" data-beui="card">
       <h2>Watchlist manager</h2>
       <label>
-        Name <input aria-label="watch name" value={name} onChange={(e) => setName(e.target.value)} />
+        Name{" "}
+        <input
+          aria-label="watch name"
+          data-beui="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </label>
       <div>
         {(
@@ -173,6 +182,7 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
             {label}{" "}
             <input
               aria-label={label}
+              data-beui="input"
               value={bbox[key]}
               onChange={(e) => setBbox({ ...bbox, [key]: e.target.value })}
             />
@@ -181,15 +191,46 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
       </div>
       <label>
         Question{" "}
-        <input aria-label="watch question" value={question} onChange={(e) => setQuestion(e.target.value)} />
+        <input
+          aria-label="watch question"
+          data-beui="input"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
       </label>
       <label>
         Cadence{" "}
-        <select aria-label="watch cadence" value={cadence} onChange={(e) => setCadence(e.target.value)}>
+        <select
+          aria-label="watch cadence"
+          role="combobox"
+          data-beui="combobox"
+          value={cadence}
+          onChange={(e) => setCadence(e.target.value)}
+        >
           <option value="daily">daily</option>
           <option value="weekly">weekly</option>
         </select>
       </label>
+      <p data-testid="template-preview-hint">
+        Template preview: {preview?.template ?? "unrouted"} · {cadence} cadence
+      </p>
+      <div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={heatUp}
+          aria-label="cadence heat-up"
+          data-beui="switch"
+          onClick={() => setHeatUp((v) => !v)}
+        >
+          Heat-up {heatUp ? "on" : "off"}
+        </button>
+        {heatUp && (
+          <p data-testid="cadence-heatup">
+            Heat-up: {cadence} cadence warms the scheduler window (display only).
+          </p>
+        )}
+      </div>
       <div>
         <button type="button" onClick={doPreview}>
           Preview template
@@ -210,6 +251,7 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [evidence, setEvidence] = useState<Record<string, Receipt[]>>({});
   const [note, setNote] = useState("");
+  const [toasts, setToasts] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
@@ -233,22 +275,34 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
   };
 
   const decide = async (a: AlertItem, kind: "approve" | "reject") => {
+    setNote("deciding…");
     try {
       if (kind === "approve") await approveAlert(a.id);
       else await rejectAlert(a.id);
+      setAlerts((prev) => prev.filter((x) => x.id !== a.id));
+      setToasts((prev) => [...prev, `${kind}d ${a.id}`]);
+      setNote(`${kind}d ${a.id}`);
       await refresh();
     } catch (err) {
       setNote(`decision failed: ${String(err)}`);
     }
   };
 
+  const queued = alerts.filter((a) => a.status === "queued");
+
   return (
     <section aria-label="alerts">
       <h2>Alert feed</h2>
-      {note && <p>{note}</p>}
-      <ul>
-        {alerts.map((a) => (
-          <li key={a.id} data-testid={`alert-${a.id}`}>
+      {note && <p data-testid="alert-note">{note}</p>}
+      <div data-beui="notification-stack" aria-label="queued-alerts">
+        <ul>
+          {queued.map((a) => (
+            <li
+              key={a.id}
+              data-testid={`alert-${a.id}`}
+              data-beui="approval-card"
+              aria-label="approval-card"
+            >
             <strong>{a.title}</strong> — confidence {a.confidence} — status {a.status}
             <details>
               <summary>Evidence</summary>
@@ -273,8 +327,16 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
               Reject
             </button>
           </li>
+          ))}
+        </ul>
+      </div>
+      <div data-beui="animated-toast-stack" aria-label="toast-stack">
+        {toasts.map((t) => (
+          <div key={t} data-testid="decision-toast">
+            {t}
+          </div>
         ))}
-      </ul>
+      </div>
     </section>
   );
 }
@@ -339,6 +401,7 @@ export default function App() {
       <AnimatedSidebar />
       <main className="beui-main">
         <TextAnimation text="ARGUS Control Room" />
+        <CommandPalette />
         <div>
           <ThemeToggle />
         </div>
