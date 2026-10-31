@@ -140,11 +140,12 @@ function ChatInner() {
   return (
     <section aria-label="chat">
       <h2>Ask the Earth</h2>
-      <div role="search" aria-label="command-palette">
+      <div role="search" aria-label="chat-prompt" data-beui="prompt-input">
         <label>
           Question{" "}
           <input
             aria-label="chat question"
+            data-beui="input"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
           />
@@ -153,6 +154,7 @@ function ChatInner() {
           BBox{" "}
           <input
             aria-label="chat bbox"
+            data-beui="input"
             value={bboxText}
             onChange={(e) => setBboxText(e.target.value)}
           />
@@ -181,7 +183,7 @@ function ChatInner() {
               </span>
             )}
             {row.kind === "answer" && (
-              <div>
+              <div data-beui="message-bubble">
                 <p>{row.content}</p>
                 {row.template && <p>template: {row.template}</p>}
                 {row.citations.length > 0 && (
