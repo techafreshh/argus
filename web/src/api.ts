@@ -182,6 +182,13 @@ export async function getEvalStatus(): Promise<EvalStatus> {
   return checked<EvalStatus>(res);
 }
 
+export interface EnsoAnalog {
+  month: string;
+  year: number;
+  similarity: number;
+  distance?: number;
+}
+
 export interface SubWatcher {
   id: string;
   [key: string]: unknown;
@@ -192,6 +199,7 @@ export interface EnsoStatus {
   intensity: string;
   trajectory: string;
   month: string;
+  analogs: EnsoAnalog[];
   subwatchers: SubWatcher[];
   [key: string]: unknown;
 }
@@ -204,12 +212,16 @@ export async function getEnsoStatus(): Promise<EnsoStatus> {
     (raw["subWatchers"] as SubWatcher[] | undefined) ??
     (raw["sub_watchers"] as SubWatcher[] | undefined) ??
     [];
+  const analogs = Array.isArray(raw["analogs"])
+    ? (raw["analogs"] as EnsoAnalog[])
+    : [];
   return {
     ...raw,
     phase: String(raw["phase"] ?? ""),
     intensity: String(raw["intensity"] ?? ""),
     trajectory: String(raw["trajectory"] ?? ""),
     month: String(raw["month"] ?? ""),
+    analogs,
     subwatchers: Array.isArray(subs) ? subs : [],
   } as EnsoStatus;
 }
