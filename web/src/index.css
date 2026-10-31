@@ -1,0 +1,223 @@
+/* ARGUS dark ops-room tokens (beUI-compatible, dependency-free). */
+
+:root {
+  --background: #060b16;
+  --foreground: #e6edf7;
+  --card: #0c1426;
+  --card-foreground: #e6edf7;
+  --primary: #38bdf8;
+  --primary-foreground: #060b16;
+  --muted: #8b98ad;
+  --muted-foreground: #8b98ad;
+  --border: #1c2942;
+  --accent: #22d3ee;
+  --destructive: #f87171;
+
+  --beui-background: var(--background);
+  --beui-foreground: var(--foreground);
+  --beui-card: var(--card);
+  --beui-primary: var(--primary);
+  --beui-muted: var(--muted);
+  --beui-border: var(--border);
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.beui-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.beui-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.beui-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
+}
+
+.beui-card h2 {
+  margin-top: 0;
+  color: var(--foreground);
+}
+
+.beui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #101b31;
+  color: var(--foreground);
+  font-weight: 600;
+  animation: beui-badge-pulse 2.4s ease-in-out infinite;
+}
+
+.beui-badge--info {
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgb(56 189 248 / 35%);
+}
+
+.beui-badge--success {
+  border-color: #34d399;
+  box-shadow: 0 0 12px rgb(52 211 153 / 35%);
+}
+
+.beui-badge--warning {
+  border-color: #fbbf24;
+  box-shadow: 0 0 12px rgb(251 191 36 / 35%);
+}
+
+.beui-badge--neutral {
+  border-color: var(--border);
+}
+
+.beui-badge--loading {
+  border-color: var(--muted);
+  opacity: 0.8;
+  animation: beui-badge-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes beui-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.beui-island {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: #0a1120;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 14px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 50%);
+}
+
+.beui-island .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.beui-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #080e1c;
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: beui-slide-in 0.3s ease-out;
+}
+
+.beui-sidebar a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.beui-sidebar a:hover,
+.beui-sidebar a:focus-visible {
+  color: var(--foreground);
+  background: #111c33;
+}
+
+@keyframes beui-slide-in {
+  from {
+    transform: translateX(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.beui-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: beui-typing 1.2s steps(24) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beui-title,
+  .beui-badge,
+  .beui-sidebar {
+    animation: none;
+  }
+}
+
+@keyframes beui-typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.beui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  margin: 0 8px 8px 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #101b31;
+  color: var(--foreground);
+  font-size: 13px;
+}
+
+.beui-globe-wrap [data-testid="globe-map"] {
+  height: 260px;
+}
+
+.beui-globe-wrap canvas {
+  width: 100%;
+  display: block;
+}
+
+.beui-toggle {
+  background: #101b31;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}

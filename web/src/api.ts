@@ -182,17 +182,34 @@ export async function getEvalStatus(): Promise<EvalStatus> {
   return checked<EvalStatus>(res);
 }
 
-/** Static in-bundle fixture: ENSO badge + sub-watcher chips (no live backend). */
-export const ENSO_FIXTURE = {
-  phase: "La Nina",
-  index: -0.8,
-  updated: "2024-01",
-  source: "fixture",
-} as const;
+export interface SubWatcher {
+  id: string;
+  [key: string]: unknown;
+}
 
-export const SUB_WATCHERS = [
-  { id: "oisst", label: "OISST SST", detail: "daily anomaly" },
-  { id: "chirps", label: "CHIRPS rain", detail: "dekadal" },
-  { id: "firms", label: "FIRMS fires", detail: "near real-time" },
-  { id: "s2", label: "Sentinel-2", detail: "optical tiles" },
-] as const;
+export interface EnsoStatus {
+  phase: string;
+  intensity: string;
+  trajectory: string;
+  month: string;
+  subwatchers: SubWatcher[];
+  [key: string]: unknown;
+}
+
+export async function getEnsoStatus(): Promise<EnsoStatus> {
+  const res = await fetch("/api/enso/status");
+  const raw = await checked<Record<string, unknown>>(res);
+  const subs =
+    (raw["subwatchers"] as SubWatcher[] | undefined) ??
+    (raw["subWatchers"] as SubWatcher[] | undefined) ??
+    (raw["sub_watchers"] as SubWatcher[] | undefined) ??
+    [];
+  return {
+    ...raw,
+    phase: String(raw["phase"] ?? ""),
+    intensity: String(raw["intensity"] ?? ""),
+    trajectory: String(raw["trajectory"] ?? ""),
+    month: String(raw["month"] ?? ""),
+    subwatchers: Array.isArray(subs) ? subs : [],
+  } as EnsoStatus;
+}
