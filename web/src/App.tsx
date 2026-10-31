@@ -6,10 +6,17 @@ import ReceiptsPanel from "./panels/ReceiptsPanel";
 import ReportsView from "./panels/ReportsView";
 import SpendEvalPanel from "./panels/SpendEvalPanel";
 import {
-  ENSO_FIXTURE,
-  SUB_WATCHERS,
+  AnimatedBadge,
+  AnimatedSidebar,
+  Card,
+  DynamicIsland,
+  TextAnimation,
+  ThemeToggle,
+} from "./beui";
+import {
   approveAlert,
   createWatch,
+  getEnsoStatus,
   listAlerts,
   listReceipts,
   listWatches,
@@ -17,6 +24,7 @@ import {
   rejectAlert,
   type AlertItem,
   type AskPreview,
+  type EnsoStatus,
   type Receipt,
   type Watch,
 } from "./api";
@@ -273,16 +281,32 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
 
 const ChatPanel = lazy(() => import("./chat/ChatPanel"));
 
+function badgeStatus(phase: string): "info" | "success" | "warning" | "neutral" {
+  if (phase === "El Nino") return "warning";
+  if (phase === "La Nina") return "info";
+  if (phase === "Neutral") return "success";
+  return "neutral";
+}
+
 export default function App() {
   const [watches, setWatches] = useState<Watch[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
-  const [enso] = useState(ENSO_FIXTURE);
+  const [enso, setEnso] = useState<EnsoStatus | null>(null);
+  const [ensoNote, setEnsoNote] = useState("");
+  const [lastTick, setLastTick] = useState("");
 
   const refresh = useCallback(async () => {
     try {
-      setWatches(await listWatches());
+      const list = await listWatches();
+      setWatches(list);
+      const stamps = list
+        .map((w) => (w as unknown as { updated_at?: unknown }).updated_at)
+        .filter((v): v is string => typeof v === "string" && v.length > 0)
+        .sort();
+      setLastTick(stamps.length > 0 ? stamps[stamps.length - 1] : new Date().toISOString());
     } catch {
       /* room stays usable offline */
+      setLastTick((prev) => prev || new Date().toISOString());
     }
     setReloadKey((k) => k + 1);
   }, []);
@@ -291,39 +315,96 @@ export default function App() {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const status = await getEnsoStatus();
+        if (!alive) return;
+        setEnso(status);
+      } catch (err) {
+        if (!alive) return;
+        setEnsoNote(`enso failed: ${String(err)}`);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const subwatchers = enso?.subwatchers ?? [];
+
   return (
-    <main>
-      <h1>ARGUS Control Room</h1>
-      <p data-testid="enso-badge">
-        ENSO {enso.phase} ({enso.index}) — {enso.updated}
-      </p>
-      <div aria-label="sub-watchers">
-        {SUB_WATCHERS.map((s) => (
-          <span key={s.id} data-testid={`chip-${s.id}`} style={{ marginRight: 8 }}>
-            {s.label} · {s.detail}
+    <div className="beui-shell">
+      <AnimatedSidebar />
+      <main className="beui-main">
+        <TextAnimation text="ARGUS Control Room" />
+        <div>
+          <ThemeToggle />
+        </div>
+        <DynamicIsland>
+          <span>
+            watches {watches.length} · last tick {lastTick || "—"}
           </span>
-        ))}
-      </div>
-      <GlobeView />
-      <WatchlistManager onChanged={() => void refresh()} />
-      <section aria-label="watches">
-        <h2>Watches ({watches.length})</h2>
-        <ul>
-          {watches.map((w) => (
-            <li key={w.id}>
-              {w.name} — {w.template} — {w.cadence}
-            </li>
+        </DynamicIsland>
+        {enso ? (
+          <AnimatedBadge status={badgeStatus(enso.phase)} testId="enso-badge">
+            ENSO {enso.phase} · {enso.intensity} · {enso.trajectory} · {enso.month}
+          </AnimatedBadge>
+        ) : (
+          <AnimatedBadge status="loading" testId="enso-badge">
+            ENSO loading…
+          </AnimatedBadge>
+        )}
+        {ensoNote && <p>{ensoNote}</p>}
+        <div aria-label="sub-watchers">
+          {subwatchers.map((s) => (
+            <span key={String(s.id)} className="beui-chip" data-testid={`chip-${String(s.id)}`}>
+              {String(s.id)}
+            </span>
           ))}
-        </ul>
-      </section>
-      <AlertFeed reloadKey={reloadKey} />
-      <Suspense fallback={null}>
-        <ChatPanel />
-      </Suspense>
-      <ReceiptsPanel />
-      <ReportsView />
-      <SpendEvalPanel />
-      <AnalogTimeline />
-    </main>
+        </div>
+        <Card label="globe" id="section-globe">
+          <div className="beui-globe-wrap">
+            <GlobeView />
+          </div>
+        </Card>
+        <Card label="watchlist" id="section-watchlist">
+          <WatchlistManager onChanged={() => void refresh()} />
+        </Card>
+        <Card label="watches" id="section-watches">
+          <section aria-label="watches">
+            <h2>Watches ({watches.length})</h2>
+            <ul>
+              {watches.map((w) => (
+                <li key={w.id}>
+                  {w.name} — {w.template} — {w.cadence}
+                </li>
+              ))}
+            </ul>
+          </section>
+        </Card>
+        <Card label="alerts" id="section-alerts">
+          <AlertFeed reloadKey={reloadKey} />
+        </Card>
+        <Card label="chat" id="section-chat">
+          <Suspense fallback={null}>
+            <ChatPanel />
+          </Suspense>
+        </Card>
+        <Card label="receipts" id="section-receipts">
+          <ReceiptsPanel />
+        </Card>
+        <Card label="reports" id="section-reports">
+          <ReportsView />
+        </Card>
+        <Card label="spend-eval" id="section-spend-eval">
+          <SpendEvalPanel />
+        </Card>
+        <Card label="analog-timeline" id="section-analog-timeline">
+          <AnalogTimeline />
+        </Card>
+      </main>
+    </div>
   );
 }
