@@ -28,3 +28,4 @@ data/cache/
 *.sqlite
 *.sqlite3
 *.db
+docker-compose.override.yml

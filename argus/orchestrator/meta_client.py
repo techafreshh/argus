@@ -33,12 +33,27 @@ MODEL_ID = os.environ.get("ARGUS_MODEL", DEFAULT_MODEL_ID)
 
 _PLAN_FIELDS = ("sensor", "aoi", "window", "comparison", "cadence")
 
+# Meta Model API strict mode: every object node must declare properties,
+# required, and additionalProperties:false -- an open nested dict 400s.
 _PLAN_JSON_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
         "sensor": {"type": "string"},
-        "aoi": {"type": "object"},
-        "window": {"type": "object"},
+        "aoi": {
+            "type": "object",
+            "properties": {
+                "type": {"type": "string"},
+                "bbox": {"type": "array", "items": {"type": "number"}},
+            },
+            "required": ["type", "bbox"],
+            "additionalProperties": False,
+        },
+        "window": {
+            "type": "object",
+            "properties": {"start": {"type": "string"}, "end": {"type": "string"}},
+            "required": ["start", "end"],
+            "additionalProperties": False,
+        },
         "comparison": {"type": "string"},
         "cadence": {"type": "string"},
     },
@@ -267,7 +282,9 @@ def _live_plan(question: str, region: dict | None, cadence: str) -> Plan:
         f"{_base_url().rstrip('/')}/chat/completions",
         json=payload,
         headers=headers,
-        timeout=20.0,
+        # Strict structured output on the Meta API measures ~15-20s; a 20s
+        # timeout made the route path fall back to the canned plan.
+        timeout=60.0,
     )
     response.raise_for_status()
     body = response.json()
