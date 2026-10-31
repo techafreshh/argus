@@ -79,10 +79,27 @@ function GlobeView() {
     if (!el) return;
     let map: maplibregl.Map | null = null;
     try {
-      // maplibre-gl v5 globe projection; empty style keeps the room offline-safe.
+      // Dark raster basemap so the room reads "online"; tiles load in the
+      // viewer's browser, and offline they simply fail to paint (blank dark
+      // globe — the same look as the old empty style, so nothing breaks).
       map = new maplibregl.Map({
         container: el,
-        style: { version: 8, sources: {}, layers: [] },
+        style: {
+          version: 8,
+          sources: {
+            basemap: {
+              type: "raster",
+              // Esri World Dark Gray Base: keyless, dark-theme native.
+              tiles: [
+                "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+              ],
+              tileSize: 256,
+              maxzoom: 16,
+              attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
+            },
+          },
+          layers: [{ id: "basemap", type: "raster", source: "basemap" }],
+        },
         center: [20, 0],
         zoom: 1.2,
       });
