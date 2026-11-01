@@ -60,6 +60,10 @@ _PLACEHOLDER = """<!DOCTYPE html>
 if _ASSETS_DIR.is_dir():
     app.mount("/assets", StaticFiles(directory=_ASSETS_DIR, html=False), name="assets")
 
+_SST_DIR = _STATIC_DIR / "sst"
+if _SST_DIR.is_dir():
+    app.mount("/sst", StaticFiles(directory=_SST_DIR, html=False), name="sst")
+
 
 @app.exception_handler(405)
 async def method_not_allowed_as_not_found(_request: Request, _exc: Exception) -> JSONResponse:

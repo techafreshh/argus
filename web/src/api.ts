@@ -204,6 +204,31 @@ export interface EnsoStatus {
   [key: string]: unknown;
 }
 
+export interface SstFrame {
+  month: string;
+  anomaly: number;
+  phase: string;
+}
+
+export interface SstManifest {
+  frames: SstFrame[];
+}
+
+export async function getSstManifest(): Promise<SstManifest> {
+  const res = await fetch("/sst/manifest.json");
+  const raw = await checked<Record<string, unknown>>(res);
+  const frames = Array.isArray(raw["frames"])
+    ? (raw["frames"] as SstFrame[])
+    : [];
+  return {
+    frames: frames.map((f) => ({
+      month: String(f.month ?? ""),
+      anomaly: Number(f.anomaly ?? 0),
+      phase: String(f.phase ?? ""),
+    })),
+  };
+}
+
 export async function getEnsoStatus(): Promise<EnsoStatus> {
   const res = await fetch("/api/enso/status");
   const raw = await checked<Record<string, unknown>>(res);

@@ -1,0 +1,2644 @@
+{
+ "frames": [
+  {
+   "month": "1982-01",
+   "anomaly": -0.170133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1982-02",
+   "anomaly": -0.088367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1982-03",
+   "anomaly": 0.285833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1982-04",
+   "anomaly": 0.596333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1982-05",
+   "anomaly": 0.722033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-06",
+   "anomaly": 0.648,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-07",
+   "anomaly": 0.9229,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-08",
+   "anomaly": 1.432633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-09",
+   "anomaly": 1.849033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-10",
+   "anomaly": 2.0145,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-11",
+   "anomaly": 2.145567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1982-12",
+   "anomaly": 2.150633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-01",
+   "anomaly": 1.865867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-02",
+   "anomaly": 1.466633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-03",
+   "anomaly": 1.102833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-04",
+   "anomaly": 0.878333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-05",
+   "anomaly": 0.535033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-06",
+   "anomaly": 0.213,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1983-07",
+   "anomaly": -0.0931,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1983-08",
+   "anomaly": -0.417367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1983-09",
+   "anomaly": -0.833967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1983-10",
+   "anomaly": -1.0665,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1983-11",
+   "anomaly": -0.886433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1983-12",
+   "anomaly": -0.737367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-01",
+   "anomaly": -0.445133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-02",
+   "anomaly": -0.486367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-03",
+   "anomaly": -0.503167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1984-04",
+   "anomaly": -0.687667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1984-05",
+   "anomaly": -0.707967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-06",
+   "anomaly": -0.399,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-07",
+   "anomaly": -0.2011,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1984-08",
+   "anomaly": -0.245367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1984-09",
+   "anomaly": -0.630967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1984-10",
+   "anomaly": -1.0435,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-11",
+   "anomaly": -1.158433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1984-12",
+   "anomaly": -1.016367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-01",
+   "anomaly": -0.945133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-02",
+   "anomaly": -0.862367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-03",
+   "anomaly": -0.953167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-04",
+   "anomaly": -0.877667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-05",
+   "anomaly": -0.708967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-06",
+   "anomaly": -0.441,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1985-07",
+   "anomaly": -0.3361,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1985-08",
+   "anomaly": -0.332367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1985-09",
+   "anomaly": -0.302967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1985-10",
+   "anomaly": -0.3145,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1985-11",
+   "anomaly": -0.364433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1985-12",
+   "anomaly": -0.485367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-01",
+   "anomaly": -0.465133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-02",
+   "anomaly": -0.334367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-03",
+   "anomaly": -0.235167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-04",
+   "anomaly": -0.213667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-05",
+   "anomaly": -0.079967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-06",
+   "anomaly": 0.204,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-07",
+   "anomaly": 0.4349,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-08",
+   "anomaly": 0.642633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1986-09",
+   "anomaly": 0.811033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1986-10",
+   "anomaly": 1.0685,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1986-11",
+   "anomaly": 1.188567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1986-12",
+   "anomaly": 1.198633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-01",
+   "anomaly": 1.059867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-02",
+   "anomaly": 0.945633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-03",
+   "anomaly": 0.810833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-04",
+   "anomaly": 0.833333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-05",
+   "anomaly": 0.998033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-06",
+   "anomaly": 1.271,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-07",
+   "anomaly": 1.4669,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-08",
+   "anomaly": 1.511633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-09",
+   "anomaly": 1.402033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-10",
+   "anomaly": 1.2315,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-11",
+   "anomaly": 0.895567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1987-12",
+   "anomaly": 0.653633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1988-01",
+   "anomaly": 0.253867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1988-02",
+   "anomaly": 0.020633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1988-03",
+   "anomaly": -0.548167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1988-04",
+   "anomaly": -1.108667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1988-05",
+   "anomaly": -1.486967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-06",
+   "anomaly": -1.359,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-07",
+   "anomaly": -1.1511,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-08",
+   "anomaly": -1.189367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-09",
+   "anomaly": -1.576967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-10",
+   "anomaly": -1.9035,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-11",
+   "anomaly": -1.933433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1988-12",
+   "anomaly": -1.710367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-01",
+   "anomaly": -1.413133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-02",
+   "anomaly": -1.169367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-03",
+   "anomaly": -0.975167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-04",
+   "anomaly": -0.647667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-05",
+   "anomaly": -0.464967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1989-06",
+   "anomaly": -0.361,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-07",
+   "anomaly": -0.4341,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-08",
+   "anomaly": -0.366367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-09",
+   "anomaly": -0.251967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-10",
+   "anomaly": -0.1945,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-11",
+   "anomaly": -0.016433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1989-12",
+   "anomaly": 0.084633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-01",
+   "anomaly": 0.214867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-02",
+   "anomaly": 0.201633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-03",
+   "anomaly": 0.202833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-04",
+   "anomaly": 0.148333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-05",
+   "anomaly": 0.133033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-06",
+   "anomaly": 0.227,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-07",
+   "anomaly": 0.3059,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-08",
+   "anomaly": 0.307633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-09",
+   "anomaly": 0.251033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-10",
+   "anomaly": 0.2335,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-11",
+   "anomaly": 0.356567,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1990-12",
+   "anomaly": 0.336633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-01",
+   "anomaly": 0.212867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-02",
+   "anomaly": 0.089633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-03",
+   "anomaly": 0.183833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-04",
+   "anomaly": 0.361333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-05",
+   "anomaly": 0.647033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1991-06",
+   "anomaly": 0.666,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-07",
+   "anomaly": 0.6879,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-08",
+   "anomaly": 0.596633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-09",
+   "anomaly": 0.820033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-10",
+   "anomaly": 1.1285,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-11",
+   "anomaly": 1.452567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1991-12",
+   "anomaly": 1.550633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-01",
+   "anomaly": 1.435867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-02",
+   "anomaly": 1.338633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-03",
+   "anomaly": 1.227833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-04",
+   "anomaly": 1.018333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-05",
+   "anomaly": 0.641033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-06",
+   "anomaly": 0.27,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1992-07",
+   "anomaly": -0.0051,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1992-08",
+   "anomaly": -0.145367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1992-09",
+   "anomaly": -0.318967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1992-10",
+   "anomaly": -0.2805,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1992-11",
+   "anomaly": -0.116433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1992-12",
+   "anomaly": 0.140633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-01",
+   "anomaly": 0.202867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-02",
+   "anomaly": 0.418633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-03",
+   "anomaly": 0.663833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1993-04",
+   "anomaly": 0.774333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1993-05",
+   "anomaly": 0.459033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1993-06",
+   "anomaly": 0.206,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1993-07",
+   "anomaly": 0.1209,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-08",
+   "anomaly": 0.197633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-09",
+   "anomaly": 0.184033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-10",
+   "anomaly": 0.1815,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-11",
+   "anomaly": 0.160567,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1993-12",
+   "anomaly": 0.052633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-01",
+   "anomaly": -0.108133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-02",
+   "anomaly": -0.041367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-03",
+   "anomaly": 0.083833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-04",
+   "anomaly": 0.153333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-05",
+   "anomaly": 0.208033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-06",
+   "anomaly": 0.18,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-07",
+   "anomaly": 0.3049,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-08",
+   "anomaly": 0.372633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-09",
+   "anomaly": 0.672033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1994-10",
+   "anomaly": 0.8985,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1994-11",
+   "anomaly": 1.020567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1994-12",
+   "anomaly": 0.835633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1995-01",
+   "anomaly": 0.630867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1995-02",
+   "anomaly": 0.354633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1995-03",
+   "anomaly": 0.138833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1995-04",
+   "anomaly": -0.100667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1995-05",
+   "anomaly": -0.182967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1995-06",
+   "anomaly": -0.326,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1995-07",
+   "anomaly": -0.5761,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1995-08",
+   "anomaly": -0.842367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1995-09",
+   "anomaly": -1.022967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1995-10",
+   "anomaly": -1.1075,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1995-11",
+   "anomaly": -1.065433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1995-12",
+   "anomaly": -0.911367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1996-01",
+   "anomaly": -0.775133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1996-02",
+   "anomaly": -0.578367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1996-03",
+   "anomaly": -0.432167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1996-04",
+   "anomaly": -0.336667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-05",
+   "anomaly": -0.289967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-06",
+   "anomaly": -0.293,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-07",
+   "anomaly": -0.2751,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-08",
+   "anomaly": -0.318367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-09",
+   "anomaly": -0.358967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-10",
+   "anomaly": -0.3895,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-11",
+   "anomaly": -0.498433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1996-12",
+   "anomaly": -0.443367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1997-01",
+   "anomaly": -0.393133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1997-02",
+   "anomaly": -0.123367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1997-03",
+   "anomaly": 0.181833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1997-04",
+   "anomaly": 0.603333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1997-05",
+   "anomaly": 1.063033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-06",
+   "anomaly": 1.453,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-07",
+   "anomaly": 1.7699,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-08",
+   "anomaly": 2.051633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-09",
+   "anomaly": 2.229033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-10",
+   "anomaly": 2.3455,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-11",
+   "anomaly": 2.371567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1997-12",
+   "anomaly": 2.258633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1998-01",
+   "anomaly": 1.828867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1998-02",
+   "anomaly": 1.411633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1998-03",
+   "anomaly": 0.855833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1998-04",
+   "anomaly": 0.407333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "1998-05",
+   "anomaly": -0.319967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1998-06",
+   "anomaly": -0.693,
+   "phase": "Neutral"
+  },
+  {
+   "month": "1998-07",
+   "anomaly": -0.9811,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1998-08",
+   "anomaly": -0.983367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1998-09",
+   "anomaly": -1.126967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1998-10",
+   "anomaly": -1.3365,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1998-11",
+   "anomaly": -1.571433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1998-12",
+   "anomaly": -1.575367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-01",
+   "anomaly": -1.334133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-02",
+   "anomaly": -0.982367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-03",
+   "anomaly": -0.839167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-04",
+   "anomaly": -0.871667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-05",
+   "anomaly": -0.934967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-06",
+   "anomaly": -0.956,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-07",
+   "anomaly": -0.9671,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-08",
+   "anomaly": -0.982367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-09",
+   "anomaly": -1.125967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-10",
+   "anomaly": -1.4055,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-11",
+   "anomaly": -1.594433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "1999-12",
+   "anomaly": -1.556367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-01",
+   "anomaly": -1.328133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-02",
+   "anomaly": -1.046367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-03",
+   "anomaly": -0.826167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-04",
+   "anomaly": -0.812667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-05",
+   "anomaly": -0.681967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-06",
+   "anomaly": -0.564,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-07",
+   "anomaly": -0.3761,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2000-08",
+   "anomaly": -0.363367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2000-09",
+   "anomaly": -0.572967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2000-10",
+   "anomaly": -0.7625,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-11",
+   "anomaly": -0.937433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2000-12",
+   "anomaly": -0.724367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2001-01",
+   "anomaly": -0.635133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2001-02",
+   "anomaly": -0.449367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2001-03",
+   "anomaly": -0.439167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-04",
+   "anomaly": -0.258667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-05",
+   "anomaly": -0.134967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-06",
+   "anomaly": -0.109,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-07",
+   "anomaly": -0.1141,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-08",
+   "anomaly": -0.179367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-09",
+   "anomaly": -0.249967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-10",
+   "anomaly": -0.4195,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-11",
+   "anomaly": -0.406433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2001-12",
+   "anomaly": -0.175367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-01",
+   "anomaly": 0.014867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-02",
+   "anomaly": 0.057633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-03",
+   "anomaly": 0.031833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-04",
+   "anomaly": 0.169333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-05",
+   "anomaly": 0.423033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-06",
+   "anomaly": 0.522,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2002-07",
+   "anomaly": 0.5929,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2002-08",
+   "anomaly": 0.709633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2002-09",
+   "anomaly": 1.014033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2002-10",
+   "anomaly": 1.1925,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2002-11",
+   "anomaly": 1.141567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2002-12",
+   "anomaly": 0.778633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2003-01",
+   "anomaly": 0.603867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2003-02",
+   "anomaly": 0.262633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2003-03",
+   "anomaly": -0.038167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-04",
+   "anomaly": -0.377667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-05",
+   "anomaly": -0.233967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-06",
+   "anomaly": 0.02,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-07",
+   "anomaly": 0.1819,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-08",
+   "anomaly": 0.179633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-09",
+   "anomaly": 0.242033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-10",
+   "anomaly": 0.2105,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-11",
+   "anomaly": 0.306567,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2003-12",
+   "anomaly": 0.303633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-01",
+   "anomaly": 0.250867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-02",
+   "anomaly": 0.087633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-03",
+   "anomaly": -0.007167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-04",
+   "anomaly": -0.013667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-05",
+   "anomaly": 0.101033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-06",
+   "anomaly": 0.367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-07",
+   "anomaly": 0.5459,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2004-08",
+   "anomaly": 0.593633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2004-09",
+   "anomaly": 0.545033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2004-10",
+   "anomaly": 0.6285,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2004-11",
+   "anomaly": 0.660567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2004-12",
+   "anomaly": 0.700633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2005-01",
+   "anomaly": 0.398867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2005-02",
+   "anomaly": 0.366633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2005-03",
+   "anomaly": 0.230833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-04",
+   "anomaly": 0.224333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-05",
+   "anomaly": 0.038033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-06",
+   "anomaly": -0.167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-07",
+   "anomaly": -0.1351,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-08",
+   "anomaly": -0.092367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-09",
+   "anomaly": -0.246967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-10",
+   "anomaly": -0.6215,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2005-11",
+   "anomaly": -0.911433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2005-12",
+   "anomaly": -0.929367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2006-01",
+   "anomaly": -0.852133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2006-02",
+   "anomaly": -0.752367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2006-03",
+   "anomaly": -0.528167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2006-04",
+   "anomaly": -0.321667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2006-05",
+   "anomaly": -0.104967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2006-06",
+   "anomaly": 0.062,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2006-07",
+   "anomaly": 0.3129,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2006-08",
+   "anomaly": 0.527633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2006-09",
+   "anomaly": 0.723033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2006-10",
+   "anomaly": 0.8625,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2006-11",
+   "anomaly": 0.937567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2006-12",
+   "anomaly": 0.647633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2007-01",
+   "anomaly": 0.142867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2007-02",
+   "anomaly": -0.289367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-03",
+   "anomaly": -0.422167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-04",
+   "anomaly": -0.496667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-05",
+   "anomaly": -0.406967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-06",
+   "anomaly": -0.541,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-07",
+   "anomaly": -0.7051,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2007-08",
+   "anomaly": -1.114367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2007-09",
+   "anomaly": -1.391967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2007-10",
+   "anomaly": -1.6405,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2007-11",
+   "anomaly": -1.780433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2007-12",
+   "anomaly": -1.811367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-01",
+   "anomaly": -1.725133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-02",
+   "anomaly": -1.410367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-03",
+   "anomaly": -1.182167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-04",
+   "anomaly": -0.923667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-05",
+   "anomaly": -0.649967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-06",
+   "anomaly": -0.331,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-07",
+   "anomaly": -0.1991,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2008-08",
+   "anomaly": -0.215367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2008-09",
+   "anomaly": -0.362967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2008-10",
+   "anomaly": -0.5845,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2008-11",
+   "anomaly": -0.852433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2008-12",
+   "anomaly": -0.969367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2009-01",
+   "anomaly": -0.920133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2009-02",
+   "anomaly": -0.755367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2009-03",
+   "anomaly": -0.455167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2009-04",
+   "anomaly": -0.074667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2009-05",
+   "anomaly": 0.324033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2009-06",
+   "anomaly": 0.512,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2009-07",
+   "anomaly": 0.4989,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2009-08",
+   "anomaly": 0.576633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2009-09",
+   "anomaly": 0.880033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2009-10",
+   "anomaly": 1.2955,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2009-11",
+   "anomaly": 1.561567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2009-12",
+   "anomaly": 1.477633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2010-01",
+   "anomaly": 1.189867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2010-02",
+   "anomaly": 0.826633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2010-03",
+   "anomaly": 0.327833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2010-04",
+   "anomaly": -0.293667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2010-05",
+   "anomaly": -0.784967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2010-06",
+   "anomaly": -1.093,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-07",
+   "anomaly": -1.2641,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-08",
+   "anomaly": -1.454367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-09",
+   "anomaly": -1.590967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-10",
+   "anomaly": -1.6255,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-11",
+   "anomaly": -1.540433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2010-12",
+   "anomaly": -1.322367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-01",
+   "anomaly": -1.109133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-02",
+   "anomaly": -0.930367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-03",
+   "anomaly": -0.799167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-04",
+   "anomaly": -0.564667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-05",
+   "anomaly": -0.407967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-06",
+   "anomaly": -0.324,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2011-07",
+   "anomaly": -0.5311,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2011-08",
+   "anomaly": -0.750367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-09",
+   "anomaly": -1.016967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-10",
+   "anomaly": -1.1015,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-11",
+   "anomaly": -0.962433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2011-12",
+   "anomaly": -0.737367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2012-01",
+   "anomaly": -0.584133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2012-02",
+   "anomaly": -0.526367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2012-03",
+   "anomaly": -0.455167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-04",
+   "anomaly": -0.319667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-05",
+   "anomaly": -0.033967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-06",
+   "anomaly": 0.265,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-07",
+   "anomaly": 0.4139,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-08",
+   "anomaly": 0.382633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-09",
+   "anomaly": 0.255033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-10",
+   "anomaly": 0.1335,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-11",
+   "anomaly": -0.091433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2012-12",
+   "anomaly": -0.281367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-01",
+   "anomaly": -0.390133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-02",
+   "anomaly": -0.300367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-03",
+   "anomaly": -0.271167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-04",
+   "anomaly": -0.350667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-05",
+   "anomaly": -0.559967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-06",
+   "anomaly": -0.465,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-07",
+   "anomaly": -0.4611,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-08",
+   "anomaly": -0.251367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-09",
+   "anomaly": -0.232967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-10",
+   "anomaly": -0.0755,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-11",
+   "anomaly": -0.155433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2013-12",
+   "anomaly": -0.273367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-01",
+   "anomaly": -0.350133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-02",
+   "anomaly": -0.111367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-03",
+   "anomaly": 0.228833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-04",
+   "anomaly": 0.335333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-05",
+   "anomaly": 0.176033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-06",
+   "anomaly": -0.044,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-07",
+   "anomaly": -0.0211,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-08",
+   "anomaly": 0.226633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-09",
+   "anomaly": 0.488033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2014-10",
+   "anomaly": 0.7365,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2014-11",
+   "anomaly": 0.798567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2014-12",
+   "anomaly": 0.692633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-01",
+   "anomaly": 0.550867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-02",
+   "anomaly": 0.579633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-03",
+   "anomaly": 0.786833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-04",
+   "anomaly": 0.928333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-05",
+   "anomaly": 1.107033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-06",
+   "anomaly": 1.358,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-07",
+   "anomaly": 1.7109,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-08",
+   "anomaly": 2.022633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-09",
+   "anomaly": 2.260033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-10",
+   "anomaly": 2.4615,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-11",
+   "anomaly": 2.582567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2015-12",
+   "anomaly": 2.558633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-01",
+   "anomaly": 2.179867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-02",
+   "anomaly": 1.645633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-03",
+   "anomaly": 1.015833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-04",
+   "anomaly": 0.439333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-05",
+   "anomaly": -0.016967,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2016-06",
+   "anomaly": -0.3,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2016-07",
+   "anomaly": -0.3601,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2016-08",
+   "anomaly": -0.441367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2016-09",
+   "anomaly": -0.524967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2016-10",
+   "anomaly": -0.6185,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2016-11",
+   "anomaly": -0.411433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2016-12",
+   "anomaly": -0.153367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-01",
+   "anomaly": 0.099867,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-02",
+   "anomaly": 0.183633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-03",
+   "anomaly": 0.229833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-04",
+   "anomaly": 0.290333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-05",
+   "anomaly": 0.261033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-06",
+   "anomaly": 0.121,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-07",
+   "anomaly": -0.0931,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-08",
+   "anomaly": -0.255367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-09",
+   "anomaly": -0.428967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-10",
+   "anomaly": -0.6995,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2017-11",
+   "anomaly": -0.782433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2017-12",
+   "anomaly": -0.773367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2018-01",
+   "anomaly": -0.725133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2018-02",
+   "anomaly": -0.677367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2018-03",
+   "anomaly": -0.480167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2018-04",
+   "anomaly": -0.149667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2018-05",
+   "anomaly": 0.080033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2018-06",
+   "anomaly": 0.153,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2018-07",
+   "anomaly": 0.2119,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2018-08",
+   "anomaly": 0.464633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2018-09",
+   "anomaly": 0.827033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2018-10",
+   "anomaly": 1.0425,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2018-11",
+   "anomaly": 1.054567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2018-12",
+   "anomaly": 0.964633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-01",
+   "anomaly": 0.867867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-02",
+   "anomaly": 0.813633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-03",
+   "anomaly": 0.695833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-04",
+   "anomaly": 0.669333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-05",
+   "anomaly": 0.529033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-06",
+   "anomaly": 0.319,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-07",
+   "anomaly": 0.1359,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2019-08",
+   "anomaly": 0.204633,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2019-09",
+   "anomaly": 0.536033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2019-10",
+   "anomaly": 0.7235,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-11",
+   "anomaly": 0.749567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2019-12",
+   "anomaly": 0.663633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2020-01",
+   "anomaly": 0.618867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2020-02",
+   "anomaly": 0.537633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2020-03",
+   "anomaly": 0.291833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2020-04",
+   "anomaly": -0.107667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2020-05",
+   "anomaly": -0.312967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2020-06",
+   "anomaly": -0.268,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2020-07",
+   "anomaly": -0.4241,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2020-08",
+   "anomaly": -0.717367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2020-09",
+   "anomaly": -1.101967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2020-10",
+   "anomaly": -1.1725,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2020-11",
+   "anomaly": -1.120433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2020-12",
+   "anomaly": -0.988367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-01",
+   "anomaly": -0.945133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-02",
+   "anomaly": -0.814367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-03",
+   "anomaly": -0.664167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-04",
+   "anomaly": -0.457667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-05",
+   "anomaly": -0.355967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2021-06",
+   "anomaly": -0.357,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2021-07",
+   "anomaly": -0.4891,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2021-08",
+   "anomaly": -0.630367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2021-09",
+   "anomaly": -0.845967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-10",
+   "anomaly": -0.9325,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-11",
+   "anomaly": -0.930433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2021-12",
+   "anomaly": -0.719367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-01",
+   "anomaly": -0.716133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-02",
+   "anomaly": -0.813367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-03",
+   "anomaly": -0.991167,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-04",
+   "anomaly": -0.948667,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-05",
+   "anomaly": -0.782967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-06",
+   "anomaly": -0.71,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-07",
+   "anomaly": -0.7891,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-08",
+   "anomaly": -0.913367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-09",
+   "anomaly": -0.924967,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-10",
+   "anomaly": -0.8605,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-11",
+   "anomaly": -0.754433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2022-12",
+   "anomaly": -0.573367,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2023-01",
+   "anomaly": -0.433133,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2023-02",
+   "anomaly": -0.161367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2023-03",
+   "anomaly": 0.072833,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2023-04",
+   "anomaly": 0.375333,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2023-05",
+   "anomaly": 0.650033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2023-06",
+   "anomaly": 0.941,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-07",
+   "anomaly": 1.2319,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-08",
+   "anomaly": 1.489633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-09",
+   "anomaly": 1.721033,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-10",
+   "anomaly": 1.9215,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-11",
+   "anomaly": 1.989567,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2023-12",
+   "anomaly": 1.864633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2024-01",
+   "anomaly": 1.501867,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2024-02",
+   "anomaly": 1.101633,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2024-03",
+   "anomaly": 0.667833,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2024-04",
+   "anomaly": 0.287333,
+   "phase": "El Nino"
+  },
+  {
+   "month": "2024-05",
+   "anomaly": 0.067033,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-06",
+   "anomaly": -0.009,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-07",
+   "anomaly": -0.0651,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-08",
+   "anomaly": -0.150367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-09",
+   "anomaly": -0.169967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-10",
+   "anomaly": -0.2945,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-11",
+   "anomaly": -0.548433,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2024-12",
+   "anomaly": -0.532367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-01",
+   "anomaly": -0.377133,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-02",
+   "anomaly": -0.051367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-03",
+   "anomaly": -0.088167,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-04",
+   "anomaly": -0.101667,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-05",
+   "anomaly": -0.117967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-06",
+   "anomaly": -0.128,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-07",
+   "anomaly": -0.2651,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-08",
+   "anomaly": -0.474367,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-09",
+   "anomaly": -0.607967,
+   "phase": "Neutral"
+  },
+  {
+   "month": "2025-10",
+   "anomaly": -0.6745,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2025-11",
+   "anomaly": -0.627433,
+   "phase": "La Nina"
+  },
+  {
+   "month": "2025-12",
+   "anomaly": -0.593367,
+   "phase": "La Nina"
+  }
+ ]
+}

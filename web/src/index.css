@@ -18,6 +18,10 @@
   --border: rgb(238 240 245 / 8%);
   --border-strong: rgb(238 240 245 / 14%);
 
+  /* SST anomaly legend (same phase colors) */
+  --sst-cool: var(--cool);
+  --sst-warm: var(--warm);
+
   /* phase colors — the ocean's own */
   --cool: #58c4e8;
   --warm: #e6a23c;
@@ -403,6 +407,63 @@ button {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--muted-foreground);
+}
+
+/* SST anomaly playback (SstGlobe) */
+.sst-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sst-wrap [data-testid="globe-map"] {
+  height: 360px;
+}
+
+.sst-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sst-controls input[type="range"] {
+  flex: 1;
+  min-width: 160px;
+  accent-color: var(--cool);
+}
+
+.sst-month {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+
+.sst-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.sst-legend-bar {
+  flex: 1;
+  max-width: 320px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--sst-cool), var(--card) 50%, var(--sst-warm));
+  border: 1px solid var(--border);
+}
+
+.sst-legend-cool {
+  color: var(--cool);
+}
+
+.sst-legend-warm {
+  color: var(--warm);
 }
 
 /* ---------- buttons ---------- */

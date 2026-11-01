@@ -1,7 +1,6 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import AnalogTimeline from "./panels/AnalogTimeline";
+import SstGlobe from "./panels/SstGlobe";
 import ReceiptsPanel from "./panels/ReceiptsPanel";
 import ReportsView from "./panels/ReportsView";
 import SpendEvalPanel from "./panels/SpendEvalPanel";
@@ -42,57 +41,9 @@ function fmtConfidence(v: number): string {
 }
 
 function GlobeView() {
-  const divRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = divRef.current;
-    if (!el) return;
-    let map: maplibregl.Map | null = null;
-    try {
-      // Dark raster basemap so the room reads "online"; tiles load in the
-      // viewer's browser, and offline they simply fail to paint (blank dark
-      // globe — the same look as the old empty style, so nothing breaks).
-      map = new maplibregl.Map({
-        container: el,
-        style: {
-          version: 8,
-          sources: {
-            basemap: {
-              type: "raster",
-              // Esri World Dark Gray Base: keyless, dark-theme native.
-              tiles: [
-                "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-              ],
-              tileSize: 256,
-              maxzoom: 16,
-              attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
-            },
-          },
-          layers: [{ id: "basemap", type: "raster", source: "basemap" }],
-        },
-        center: [20, 0],
-        zoom: 1.2,
-      });
-      const globe = { type: "globe" as const };
-      try {
-        (map as unknown as { setProjection(p: unknown): void }).setProjection(globe);
-      } catch {
-        /* older renderers ignore globe projection */
-      }
-    } catch {
-      /* WebGL unavailable in headless probes: the frame still renders */
-    }
-    return () => {
-      try {
-        map?.remove();
-      } catch {
-        /* noop */
-      }
-    };
-  }, []);
   return (
     <section aria-label="globe">
-      <div ref={divRef} data-testid="globe-map" style={{ height: 360 }} />
-      <p className="beui-globe-caption">Esri World Dark Gray · live tiles</p>
+      <SstGlobe />
     </section>
   );
 }
