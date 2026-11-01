@@ -7,14 +7,7 @@ import ReportsView from "./panels/ReportsView";
 import SpendEvalPanel from "./panels/SpendEvalPanel";
 import CommandPalette from "./palette/CommandPalette";
 import "./palette/palette.css";
-import {
-  AnimatedBadge,
-  AnimatedSidebar,
-  Card,
-  DynamicIsland,
-  TextAnimation,
-  ThemeToggle,
-} from "./beui";
+import { Card, EnsoReadout, LoopIsland, Sidebar } from "./beui";
 import {
   approveAlert,
   createWatch,
@@ -33,43 +26,19 @@ import {
 
 const BLANK = { minLon: "24", minLat: "-12.5", maxLon: "30", maxLat: "-8" };
 
-function SstCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    let frame = 0;
-    let alive = true;
-    const W = (canvas.width = 480);
-    const H = (canvas.height = 220);
-    const draw = () => {
-      if (!alive) return;
-      frame += 1;
-      const img = ctx.createImageData(W, H);
-      for (let y = 0; y < H; y++) {
-        for (let x = 0; x < W; x++) {
-          const i = (y * W + x) * 4;
-          const wave =
-            Math.sin((x / W) * Math.PI * 4 + frame / 12) *
-            Math.cos((y / H) * Math.PI * 3 + frame / 20);
-          const v = Math.max(0, Math.min(1, 0.5 + wave * 0.35 + (y / H - 0.5) * 0.4));
-          img.data[i] = Math.round(40 + v * 200);
-          img.data[i + 1] = Math.round(90 + v * 90);
-          img.data[i + 2] = Math.round(200 - v * 130);
-          img.data[i + 3] = 255;
-        }
-      }
-      ctx.putImageData(img, 0, 0);
-      requestAnimationFrame(draw);
-    };
-    draw();
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return <canvas ref={ref} aria-label="SST animation" style={{ width: "100%", display: "block" }} />;
+function errText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+function utcClock(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
+}
+
+function fmtConfidence(v: number): string {
+  return `${Math.round(v <= 1 ? v * 100 : v)}%`;
 }
 
 function GlobeView() {
@@ -110,7 +79,7 @@ function GlobeView() {
         /* older renderers ignore globe projection */
       }
     } catch {
-      /* WebGL unavailable in headless probes: canvas fallback below still shows */
+      /* WebGL unavailable in headless probes: the frame still renders */
     }
     return () => {
       try {
@@ -122,9 +91,8 @@ function GlobeView() {
   }, []);
   return (
     <section aria-label="globe">
-      <h2>Globe</h2>
-      <div ref={divRef} data-testid="globe-map" style={{ height: 260 }} />
-      <SstCanvas />
+      <div ref={divRef} data-testid="globe-map" style={{ height: 360 }} />
+      <p className="beui-globe-caption">Esri World Dark Gray · live tiles</p>
     </section>
   );
 }
@@ -136,6 +104,7 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
   const [cadence, setCadence] = useState("daily");
   const [preview, setPreview] = useState<AskPreview | null>(null);
   const [status, setStatus] = useState("");
+  const [failed, setFailed] = useState(false);
   const [heatUp, setHeatUp] = useState(false);
 
   const coords = () => [
@@ -146,19 +115,22 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
   ];
 
   const doPreview = async () => {
-    setStatus("previewing…");
+    setStatus("Previewing");
+    setFailed(false);
     try {
       const [a, b, c, d] = coords();
       const p = await previewTemplate(question, { type: "bbox", coords: [a, b, c, d] }, cadence);
       setPreview(p);
-      setStatus(p.template ? `template: ${p.template}` : "template: unrouted");
+      setStatus("");
     } catch (err) {
-      setStatus(`preview failed: ${String(err)}`);
+      setStatus(`Preview failed — ${errText(err)}`);
+      setFailed(true);
     }
   };
 
   const doCreate = async () => {
-    setStatus("creating…");
+    setStatus("Creating");
+    setFailed(false);
     try {
       const [a, b, c, d] = coords();
       await createWatch({
@@ -167,26 +139,38 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
         question,
         cadence,
       });
-      setStatus("watch created (201)");
+      setStatus("Watch created — first acquisition slot scheduled");
       onChanged();
     } catch (err) {
-      setStatus(`create failed: ${String(err)}`);
+      setStatus(`Create failed — ${errText(err)}`);
+      setFailed(true);
     }
   };
 
   return (
     <section aria-label="watchlist" data-beui="card">
       <h2>Watchlist manager</h2>
-      <label>
-        Name{" "}
-        <input
-          aria-label="watch name"
-          data-beui="input"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </label>
-      <div>
+      <div className="form-grid">
+        <label className="field span-2">
+          <span className="field-label">Name</span>
+          <input
+            className="input"
+            aria-label="watch name"
+            data-beui="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+        <label className="field span-2">
+          <span className="field-label">Question</span>
+          <input
+            className="input"
+            aria-label="watch question"
+            data-beui="input"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+        </label>
         {(
           [
             ["minLon", "Min lon"],
@@ -195,9 +179,10 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
             ["maxLat", "Max lat"],
           ] as const
         ).map(([key, label]) => (
-          <label key={key} style={{ marginRight: 8 }}>
-            {label}{" "}
+          <label className="field" key={key}>
+            <span className="field-label">{label}</span>
             <input
+              className="input"
               aria-label={label}
               data-beui="input"
               value={bbox[key]}
@@ -206,60 +191,64 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
           </label>
         ))}
       </div>
-      <label>
-        Question{" "}
-        <input
-          aria-label="watch question"
-          data-beui="input"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-        />
-      </label>
-      <label>
-        Cadence{" "}
-        <select
-          aria-label="watch cadence"
-          role="combobox"
-          data-beui="combobox"
-          value={cadence}
-          onChange={(e) => setCadence(e.target.value)}
-        >
-          <option value="daily">daily</option>
-          <option value="weekly">weekly</option>
-        </select>
-      </label>
-      <p data-testid="template-preview-hint">
-        Template preview: {preview?.template ?? "unrouted"} · {cadence} cadence
-      </p>
-      <div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={heatUp}
-          aria-label="cadence heat-up"
-          data-beui="switch"
-          onClick={() => setHeatUp((v) => !v)}
-        >
-          Heat-up {heatUp ? "on" : "off"}
-        </button>
-        {heatUp && (
-          <p data-testid="cadence-heatup">
-            Heat-up: {cadence} cadence warms the scheduler window (display only).
-          </p>
-        )}
+      <div className="form-row">
+        <label className="field">
+          <span className="field-label">Cadence</span>
+          <select
+            className="input"
+            aria-label="watch cadence"
+            role="combobox"
+            data-beui="combobox"
+            value={cadence}
+            onChange={(e) => setCadence(e.target.value)}
+          >
+            <option value="daily">daily</option>
+            <option value="weekly">weekly</option>
+          </select>
+        </label>
+        <div className="field">
+          <span className="field-label">Heat-up</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={heatUp}
+            aria-label="cadence heat-up"
+            data-beui="switch"
+            onClick={() => setHeatUp((v) => !v)}
+          >
+            {heatUp ? "On" : "Off"}
+          </button>
+        </div>
       </div>
-      <div>
-        <button type="button" onClick={doPreview}>
+      {heatUp && (
+        <p className="note" data-testid="cadence-heatup">
+          Heat-up re-prioritizes the schedule when a signal crosses threshold (demo
+          surface — no scheduler change yet).
+        </p>
+      )}
+      <p data-testid="template-preview-hint" className="note">
+        {preview?.template
+          ? `Routed to ${preview.template} · ${cadence} cadence`
+          : `No template matched · ${cadence} cadence`}
+      </p>
+      <div className="form-row">
+        <button type="button" className="btn btn--quiet" onClick={doPreview}>
           Preview template
-        </button>{" "}
-        <button type="button" onClick={doCreate}>
+        </button>
+        <button type="button" className="btn btn--primary" onClick={doCreate}>
           Add watch
         </button>
       </div>
       {preview && (
-        <pre data-testid="template-preview">{JSON.stringify(preview, null, 2)}</pre>
+        <pre className="dump" data-testid="template-preview">
+          {JSON.stringify(preview, null, 2)}
+        </pre>
       )}
-      {status && <p data-testid="watch-status">{status}</p>}
+      {status && (
+        <p data-testid="watch-status" className={failed ? "note note--error" : "note"}>
+          {status}
+        </p>
+      )}
     </section>
   );
 }
@@ -268,13 +257,17 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [evidence, setEvidence] = useState<Record<string, Receipt[]>>({});
   const [note, setNote] = useState("");
+  const [failed, setFailed] = useState(false);
   const [toasts, setToasts] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
       setAlerts(await listAlerts());
+      setNote("");
+      setFailed(false);
     } catch (err) {
-      setNote(`alerts failed: ${String(err)}`);
+      setNote(`Alerts unavailable — ${errText(err)}`);
+      setFailed(true);
     }
   }, []);
 
@@ -287,21 +280,21 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
       const receipts = await listReceipts(a.watch_id);
       setEvidence((prev) => ({ ...prev, [a.id]: receipts }));
     } catch (err) {
-      setNote(`evidence failed: ${String(err)}`);
+      setNote(`Evidence unavailable — ${errText(err)}`);
+      setFailed(true);
     }
   };
 
   const decide = async (a: AlertItem, kind: "approve" | "reject") => {
-    setNote("deciding…");
     try {
       if (kind === "approve") await approveAlert(a.id);
       else await rejectAlert(a.id);
       setAlerts((prev) => prev.filter((x) => x.id !== a.id));
-      setToasts((prev) => [...prev, `${kind}d ${a.id}`]);
-      setNote(`${kind}d ${a.id}`);
+      setToasts((prev) => [...prev, `${kind === "approve" ? "Approved" : "Rejected"} ${a.id}`]);
       await refresh();
     } catch (err) {
-      setNote(`decision failed: ${String(err)}`);
+      setNote(`Decision failed — ${errText(err)}`);
+      setFailed(true);
     }
   };
 
@@ -310,46 +303,60 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
   return (
     <section aria-label="alerts">
       <h2>Alert feed</h2>
-      {note && <p data-testid="alert-note">{note}</p>}
+      {note && (
+        <p data-testid="alert-note" className={failed ? "note note--error" : "note"}>
+          {note}
+        </p>
+      )}
+      {queued.length === 0 && !note && <p className="note">No queued alerts</p>}
       <div data-beui="notification-stack" aria-label="queued-alerts">
-        <ul>
+        <ul className="activity-list" style={{ gap: 10 }}>
           {queued.map((a) => (
             <li
               key={a.id}
               data-testid={`alert-${a.id}`}
               data-beui="approval-card"
               aria-label="approval-card"
+              className="alert-card"
+              style={{ listStyle: "none" }}
             >
-            <strong>{a.title}</strong> — confidence {a.confidence} — status {a.status}
-            <details>
-              <summary>Evidence</summary>
-              <pre>{JSON.stringify(a.evidence, null, 2)}</pre>
-              {(evidence[a.id] ?? []).map((r) => (
-                <p key={r.id}>
-                  receipt {r.tool} {r.data_hash} tokens={r.tokens ?? r.token_usage}
-                </p>
-              ))}
-              <button type="button" onClick={() => void showEvidence(a)}>
-                Load evidence
-              </button>
-            </details>
-            <button
-              type="button"
-              disabled={a.status !== "queued"}
-              onClick={() => void decide(a, "approve")}
-            >
-              Approve
-            </button>{" "}
-            <button type="button" disabled={a.status !== "queued"} onClick={() => void decide(a, "reject")}>
-              Reject
-            </button>
-          </li>
+              <div className="alert-card-head">
+                <span className="alert-card-title">{a.title}</span>
+                <span className="alert-conf">{fmtConfidence(a.confidence)}</span>
+              </div>
+              <div className="alert-evidence">
+                {Object.entries(a.evidence).length === 0 && (
+                  <span className="alert-evidence-row">no evidence rows</span>
+                )}
+                {Object.entries(a.evidence).map(([k, v]) => (
+                  <span key={k} className="alert-evidence-row">
+                    <b>{k}</b> {typeof v === "string" ? v : JSON.stringify(v)}
+                  </span>
+                ))}
+                {(evidence[a.id] ?? []).map((r) => (
+                  <span key={r.id} className="alert-evidence-row">
+                    <b>{r.tool}</b> {r.data_hash} tokens {r.tokens ?? r.token_usage}
+                  </span>
+                ))}
+              </div>
+              <div className="alert-actions">
+                <button type="button" className="btn btn--primary" disabled={a.status !== "queued"} onClick={() => void decide(a, "approve")}>
+                  Approve
+                </button>
+                <button type="button" className="btn btn--danger" disabled={a.status !== "queued"} onClick={() => void decide(a, "reject")}>
+                  Reject
+                </button>
+                <button type="button" className="btn btn--quiet" onClick={() => void showEvidence(a)}>
+                  Load evidence
+                </button>
+              </div>
+            </li>
           ))}
         </ul>
       </div>
       <div data-beui="animated-toast-stack" aria-label="toast-stack">
         {toasts.map((t) => (
-          <div key={t} data-testid="decision-toast">
+          <div key={t} data-testid="decision-toast" className="toast">
             {t}
           </div>
         ))}
@@ -360,19 +367,18 @@ function AlertFeed({ reloadKey }: { reloadKey: number }) {
 
 const ChatPanel = lazy(() => import("./chat/ChatPanel"));
 
-function badgeStatus(phase: string): "info" | "success" | "warning" | "neutral" {
-  if (phase === "El Nino") return "warning";
-  if (phase === "La Nina") return "info";
-  if (phase === "Neutral") return "success";
-  return "neutral";
-}
-
 export default function App() {
   const [watches, setWatches] = useState<Watch[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [enso, setEnso] = useState<EnsoStatus | null>(null);
   const [ensoNote, setEnsoNote] = useState("");
   const [lastTick, setLastTick] = useState("");
+  const [clock, setClock] = useState(() => utcClock(new Date().toISOString()));
+
+  useEffect(() => {
+    const t = setInterval(() => setClock(utcClock(new Date().toISOString())), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const refresh = useCallback(async () => {
     try {
@@ -403,7 +409,7 @@ export default function App() {
         setEnso(status);
       } catch (err) {
         if (!alive) return;
-        setEnsoNote(`enso failed: ${String(err)}`);
+        setEnsoNote(`ENSO readout unavailable — ${errText(err)}`);
       }
     })();
     return () => {
@@ -415,50 +421,42 @@ export default function App() {
 
   return (
     <div className="beui-shell">
-      <AnimatedSidebar />
+      <Sidebar />
       <main className="beui-main">
-        <TextAnimation text="ARGUS Control Room" />
-        <CommandPalette />
-        <div>
-          <ThemeToggle />
+        <header className="beui-topbar">
+          <h1 className="beui-title">Control room</h1>
+          <CommandPalette />
+          <span className="beui-clock">{clock}</span>
+        </header>
+        <div className="beui-strip">
+          <LoopIsland count={watches.length} lastTick={utcClock(lastTick)} />
+          <EnsoReadout enso={enso} />
         </div>
-        <DynamicIsland>
-          <span>
-            watches {watches.length} · last tick {lastTick || "—"}
-          </span>
-        </DynamicIsland>
-        {enso ? (
-          <AnimatedBadge status={badgeStatus(enso.phase)} testId="enso-badge">
-            ENSO {enso.phase} · {enso.intensity} · {enso.trajectory} · {enso.month}
-          </AnimatedBadge>
-        ) : (
-          <AnimatedBadge status="loading" testId="enso-badge">
-            ENSO loading…
-          </AnimatedBadge>
-        )}
-        {ensoNote && <p>{ensoNote}</p>}
-        <div aria-label="sub-watchers">
-          {subwatchers.map((s) => (
-            <span key={String(s.id)} className="beui-chip" data-testid={`chip-${String(s.id)}`}>
-              {String(s.id)}
-            </span>
-          ))}
-        </div>
-        <Card label="globe" id="section-globe">
-          <div className="beui-globe-wrap">
-            <GlobeView />
+        {subwatchers.length > 0 && (
+          <div aria-label="sub-watchers" className="beui-strip">
+            {subwatchers.map((s) => (
+              <span key={String(s.id)} className="beui-chip" data-testid={`chip-${String(s.id)}`}>
+                {String(s.id)}
+              </span>
+            ))}
           </div>
+        )}
+        {ensoNote && <p className="note note--warn">{ensoNote}</p>}
+        <Card label="globe" id="section-globe">
+          <h2>Globe</h2>
+          <GlobeView />
         </Card>
         <Card label="watchlist" id="section-watchlist">
           <WatchlistManager onChanged={() => void refresh()} />
         </Card>
         <Card label="watches" id="section-watches">
           <section aria-label="watches">
-            <h2>Watches ({watches.length})</h2>
-            <ul>
+            <h2>Active watches ({watches.length})</h2>
+            {watches.length === 0 && <p className="note">No watches yet — add one above</p>}
+            <ul className="activity-list">
               {watches.map((w) => (
-                <li key={w.id}>
-                  {w.name} — {w.template} — {w.cadence}
+                <li key={w.id} className="receipt-line">
+                  <b>{w.name}</b> {w.template} · {w.cadence}
                 </li>
               ))}
             </ul>

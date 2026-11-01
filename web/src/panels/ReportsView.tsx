@@ -25,20 +25,19 @@ function CountUp({ value, format }: { value: number; format?: (v: number) => str
   return <span aria-label="number">{format ? format(current) : String(current)}</span>;
 }
 
-/** Graded report card: headline, count-up numbers, citations, before/after viewer. */
+/** Graded report card: headline, count-up figures, citations, before/after imagery. */
 export default function ReportsView() {
   const [reportId, setReportId] = useState("");
   const [card, setCard] = useState<ReportCard | null>(null);
   const [note, setNote] = useState("");
 
   const load = async () => {
-    setNote("loading…");
+    setNote("");
     try {
       setCard(await getReport(reportId.trim()));
-      setNote("");
     } catch (err) {
       setCard(null);
-      setNote(`report failed: ${String(err)}`);
+      setNote(`Report unavailable — ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -49,43 +48,73 @@ export default function ReportsView() {
   return (
     <section aria-label="reports">
       <h2>Reports</h2>
-      <label>
-        Report id{" "}
-        <input aria-label="report id" value={reportId} onChange={(e) => setReportId(e.target.value)} />
-      </label>{" "}
-      <button type="button" onClick={() => void load()}>
-        Load report
-      </button>
-      {note && <p>{note}</p>}
+      <div className="form-row">
+        <label className="field" style={{ minWidth: 260 }}>
+          <span className="field-label">Report id</span>
+          <input
+            className="input"
+            aria-label="report id"
+            value={reportId}
+            onChange={(e) => setReportId(e.target.value)}
+          />
+        </label>
+        <div className="field">
+          <span className="field-label" aria-hidden="true">
+            &nbsp;
+          </span>
+          <button type="button" className="btn btn--quiet" onClick={() => void load()}>
+            Load report
+          </button>
+        </div>
+      </div>
+      {note && <p className="note note--error">{note}</p>}
       {card && (
         <article aria-label="card" data-testid={`report-${card.id}`}>
-          <h3>{card.headline}</h3>
-          <p>
-            <CountUp value={card.hectares} format={(v) => `${v} ha`} /> — counts{" "}
-            <code>{JSON.stringify(card.counts)}</code> — confidence{" "}
-            <CountUp value={card.confidence * 100} format={(v) => `${Math.round(v)}%`} />
-          </p>
-          <div aria-label="image-viewer">
+          <h3 style={{ fontSize: 16, fontWeight: 500 }}>{card.headline}</h3>
+          <div className="stat-row">
+            <div className="stat">
+              <span className="stat-label">Area</span>
+              <span className="stat-figure stat-figure--accent">
+                <CountUp value={card.hectares} format={(v) => `${Math.round(v).toLocaleString("en-US")}`} />
+              </span>
+              <span className="stat-sub">hectares</span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">Confidence</span>
+              <span className="stat-figure">
+                <CountUp value={card.confidence * 100} format={(v) => `${Math.round(v)}%`} />
+              </span>
+              <span className="stat-sub">graded</span>
+            </div>
+            {Object.entries(card.counts).map(([k, v]) => (
+              <div className="stat" key={k}>
+                <span className="stat-label">{k}</span>
+                <span className="stat-figure">{String(v)}</span>
+                <span className="stat-sub">count</span>
+              </div>
+            ))}
+          </div>
+          <div aria-label="image-viewer" className="report-images">
             {before ? (
               <img src={before} alt="before" />
             ) : (
-              <p>no before imagery available</p>
+              <p className="report-image-slot">No before imagery</p>
             )}
             {after ? (
               <img src={after} alt="after" />
             ) : (
-              <p>no after imagery available</p>
+              <p className="report-image-slot">No after imagery</p>
             )}
           </div>
-          <ul aria-label="citations">
+          <ul aria-label="citations" className="citations">
             {card.sources.map((s) => (
-              <li key={s}>
-                <a href={s}>{s}</a>
+              <li key={s} className="receipt-line">
+                <b>source</b> <a href={s}>{s}</a>
               </li>
             ))}
             {receipts.map((r) => (
-              <li key={r.id}>
-                <a href={`#receipt-${r.id}`}>receipt {r.id}</a>
+              <li key={r.id} className="receipt-line">
+                <b>receipt</b> <a href={`#receipt-${r.id}`}>{r.id}</a> hash {r.data_hash}
               </li>
             ))}
           </ul>

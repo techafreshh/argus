@@ -11,7 +11,7 @@ function sortKeyOf(r: Receipt, key: SortKey): string | number {
   return typeof t === "number" ? t : Number(t) || 0;
 }
 
-/** Per-watch tool trail: virtualized-feel sortable table + activity disclosure. */
+/** Per-watch tool trail: sortable receipt table + activity stream. */
 export default function ReceiptsPanel() {
   const [watchId, setWatchId] = useState("");
   const [entries, setEntries] = useState<Receipt[] | null>(null);
@@ -21,13 +21,12 @@ export default function ReceiptsPanel() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const load = async () => {
-    setNote("loading…");
+    setNote("");
     try {
       setEntries(await listReceipts(watchId.trim()));
-      setNote("");
     } catch (err) {
       setEntries(null);
-      setNote(`receipts failed: ${String(err)}`);
+      setNote(`Receipts unavailable — ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -52,83 +51,103 @@ export default function ReceiptsPanel() {
     });
   }, [entries, sortKey, sortDir]);
 
-  const arrow = (key: SortKey) => (sortKey === key ? (sortDir === 1 ? " ▲" : " ▼") : "");
+  const arrow = (key: SortKey) => (sortKey === key ? (sortDir === 1 ? " ↑" : " ↓") : "");
 
   return (
     <section aria-label="receipts">
       <h2>Receipts</h2>
-      <label>
-        Watch id{" "}
-        <input aria-label="receipts watch id" value={watchId} onChange={(e) => setWatchId(e.target.value)} />
-      </label>{" "}
-      <button type="button" onClick={() => void load()}>
-        Load receipts
-      </button>
-      {note && <p>{note}</p>}
-      {entries !== null && entries.length === 0 && <p>no receipts</p>}
+      <div className="form-row">
+        <label className="field" style={{ minWidth: 260 }}>
+          <span className="field-label">Watch id</span>
+          <input
+            className="input"
+            aria-label="receipts watch id"
+            value={watchId}
+            onChange={(e) => setWatchId(e.target.value)}
+          />
+        </label>
+        <div className="field">
+          <span className="field-label" aria-hidden="true">
+            &nbsp;
+          </span>
+          <button type="button" className="btn btn--quiet" onClick={() => void load()}>
+            Load receipts
+          </button>
+        </div>
+      </div>
+      {note && <p className="note note--error">{note}</p>}
+      {entries !== null && entries.length === 0 && (
+        <p className="note">No receipts yet — run a watch first</p>
+      )}
       {sorted !== null && sorted.length > 0 && (
         <>
-          <table aria-label="table" style={{ display: "block", maxHeight: 320, overflowY: "auto" }}>
-            <thead style={{ position: "sticky", top: 0, background: "inherit" }}>
-              <tr>
-                <th>
-                  <button type="button" onClick={() => toggleSort("tool")}>
-                    Tool{arrow("tool")}
-                  </button>
-                </th>
-                <th>
-                  <button type="button" onClick={() => toggleSort("source")}>
-                    Source URL{arrow("source")}
-                  </button>
-                </th>
-                <th>Params</th>
-                <th>
-                  <button type="button" onClick={() => toggleSort("hash")}>
-                    Data hash{arrow("hash")}
-                  </button>
-                </th>
-                <th>Plot</th>
-                <th>
-                  <button type="button" onClick={() => toggleSort("tokens")}>
-                    Tokens{arrow("tokens")}
-                  </button>
-                </th>
-                <th>Detail</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((r) => (
-                <tr key={r.id} data-testid={`receipt-${r.id}`}>
-                  <td>{r.tool}</td>
-                  <td>
-                    <a href={r.source_url}>{r.source_url}</a>
-                  </td>
-                  <td>
-                    <code>{JSON.stringify(r.params)}</code>
-                  </td>
-                  <td>
-                    <code>{r.data_hash}</code>
-                  </td>
-                  <td>{(r as Receipt & { plot_path?: string }).plot_path ?? ""}</td>
-                  <td>{r.tokens ?? r.token_usage}</td>
-                  <td>
-                    <button
-                      type="button"
-                      aria-expanded={Boolean(expanded[r.id])}
-                      onClick={() =>
-                        setExpanded((prev) => ({ ...prev, [r.id]: !prev[r.id] }))
-                      }
-                    >
-                      {expanded[r.id] ? "Hide" : "Show"}
+          <div className="table-scroll">
+            <table aria-label="table" className="data-table">
+              <thead>
+                <tr>
+                  <th>
+                    <button type="button" onClick={() => toggleSort("tool")}>
+                      Tool{arrow("tool")}
                     </button>
-                  </td>
+                  </th>
+                  <th>
+                    <button type="button" onClick={() => toggleSort("source")}>
+                      Source{arrow("source")}
+                    </button>
+                  </th>
+                  <th>Params</th>
+                  <th>
+                    <button type="button" onClick={() => toggleSort("hash")}>
+                      Data hash{arrow("hash")}
+                    </button>
+                  </th>
+                  <th className="num">
+                    <button type="button" onClick={() => toggleSort("tokens")}>
+                      Tokens{arrow("tokens")}
+                    </button>
+                  </th>
+                  <th>Detail</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <ul aria-label="agent-activity">
+              </thead>
+              <tbody>
+                {sorted.map((r) => (
+                  <tr key={r.id} data-testid={`receipt-${r.id}`}>
+                    <td>{r.tool}</td>
+                    <td>
+                      <a href={r.source_url} className="hash" style={{ maxWidth: 220 }} title={r.source_url}>
+                        {r.source_url}
+                      </a>
+                    </td>
+                    <td>
+                      <span className="hash" style={{ maxWidth: 180 }} title={JSON.stringify(r.params)}>
+                        {JSON.stringify(r.params)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="hash" title={r.data_hash}>
+                        {r.data_hash}
+                      </span>
+                    </td>
+                    <td className="num">{r.tokens ?? r.token_usage}</td>
+                    <td>
+                      <button
+                        type="button"
+                        aria-expanded={Boolean(expanded[r.id])}
+                        onClick={() =>
+                          setExpanded((prev) => ({ ...prev, [r.id]: !prev[r.id] }))
+                        }
+                      >
+                        {expanded[r.id] ? "Hide" : "Show"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ul aria-label="agent-activity" className="activity-list">
             {sorted.map((r) => (
-              <li key={r.id}>
+              <li key={r.id} style={{ listStyle: "none" }}>
                 <button
                   type="button"
                   onClick={() =>
@@ -138,10 +157,10 @@ export default function ReceiptsPanel() {
                   {r.tool} — {r.id}
                 </button>
                 {expanded[r.id] && (
-                  <span data-testid="tool-result">
+                  <span data-testid="tool-result" className="receipt-line">
                     source <a href={r.source_url}>{r.source_url}</a> params{" "}
-                    <code>{JSON.stringify(r.params)}</code> hash{" "}
-                    <code>{r.data_hash}</code> tokens {r.tokens ?? r.token_usage}
+                    {JSON.stringify(r.params)} hash {r.data_hash} tokens{" "}
+                    {r.tokens ?? r.token_usage}
                   </span>
                 )}
               </li>

@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { CopilotKit } from "@copilotkit/react-core";
 import { approveAlert, listAlerts, rejectAlert } from "../api";
 import { streamChat, type AguiEvent } from "./chatClient";
 
@@ -59,7 +58,7 @@ function ChatInner() {
     setBusy(true);
     setDegraded(false);
     setDecision("");
-    setStatus("streaming plan…");
+    setStatus("Planning");
     setRows((prev) => [...prev, { kind: "activity", text: `asking: ${question}` }]);
     const onEvent = (event: AguiEvent) => {
       if (event.type === "tool_call") {
@@ -68,7 +67,7 @@ function ChatInner() {
         if (plan && typeof plan === "object") setTodos(planTodos(plan));
         setRows((prev) => [
           ...prev,
-          { kind: "activity", text: `agent activity: tool_call ${event.tool}` },
+          { kind: "activity", text: `tool call ${event.tool}` },
         ]);
       } else if (event.type === "tool_result") {
         setTodos((prev) => prev.map((t) => ({ ...t, done: true })));
@@ -101,13 +100,13 @@ function ChatInner() {
         setBusy(false);
         if (!event.ok) {
           setDegraded(true);
-          setStatus(`chat unavailable — panels still work below`);
+          setStatus("");
           setRows((prev) => [
             ...prev,
             { kind: "error", text: String(event.error ?? "stream failed") },
           ]);
         } else {
-          setStatus("run finished");
+          setStatus("Run finished");
         }
       }
     };
@@ -119,112 +118,124 @@ function ChatInner() {
   };
 
   const decide = async (kind: "approve" | "reject") => {
-    setDecision("deciding…");
+    setDecision("Deciding");
     try {
       const alerts = await listAlerts();
       const target = alerts.find(
         (a) => a.watch_id === lastWatch && a.status === "queued",
       );
       if (!target) {
-        setDecision("no queued alert for this run yet");
+        setDecision("No queued alert for this run yet");
         return;
       }
       if (kind === "approve") await approveAlert(target.id);
       else await rejectAlert(target.id);
-      setDecision(`${kind}d ${target.id}`);
+      setDecision(kind === "approve" ? "Approved" : "Rejected");
     } catch (err) {
-      setDecision(`decision failed: ${String(err)}`);
+      setDecision(`Decision failed — ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
   return (
     <section aria-label="chat">
       <h2>Ask the Earth</h2>
-      <div role="search" aria-label="chat-prompt" data-beui="prompt-input">
-        <label>
-          Question{" "}
+      <div role="search" aria-label="chat-prompt" data-beui="prompt-input" className="form-row">
+        <label className="field" style={{ flex: 2, minWidth: 220 }}>
+          <span className="field-label">Question</span>
           <input
+            className="input"
             aria-label="chat question"
             data-beui="input"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
           />
-        </label>{" "}
-        <label>
-          BBox{" "}
+        </label>
+        <label className="field" style={{ flex: 1, minWidth: 140 }}>
+          <span className="field-label">BBox</span>
           <input
+            className="input"
             aria-label="chat bbox"
             data-beui="input"
             value={bboxText}
             onChange={(e) => setBboxText(e.target.value)}
           />
-        </label>{" "}
-        <button type="button" onClick={() => void ask()} disabled={busy}>
-          {busy ? "Streaming…" : "Ask"}
-        </button>
+        </label>
+        <div className="field">
+          <span className="field-label" aria-hidden="true">
+            &nbsp;
+          </span>
+          <button type="button" className="btn btn--primary" onClick={() => void ask()} disabled={busy}>
+            {busy ? "Streaming" : "Ask"}
+          </button>
+        </div>
       </div>
-      {status && <p data-testid="chat-status">{status}</p>}
+      {status && <p data-testid="chat-status" className="note">{status}</p>}
       {todos.length > 0 && (
-        <ol aria-label="todo-list">
+        <ol aria-label="todo-list" className="plan-list">
           {todos.map((t) => (
-            <li key={t.label}>
-              [{t.done ? "x" : " "}] {t.label}: {t.detail}
+            <li key={t.label} className={t.done ? "is-done" : undefined}>
+              <span className="plan-check" aria-hidden="true" />
+              <span className="plan-key">{t.label}</span>
+              <span>{t.detail}</span>
             </li>
           ))}
         </ol>
       )}
-      <ul aria-label="agent-activity">
+      <ul aria-label="agent-activity" className="activity-list">
         {rows.map((row, i) => (
-          <li key={i}>
-            {row.kind === "activity" && <span>{row.text}</span>}
+          <li key={i} style={{ listStyle: "none" }}>
+            {row.kind === "activity" && <span className="note">{row.text}</span>}
             {row.kind === "tool" && (
-              <span data-testid="tool-result">
-                tool-result {row.tool} receipt {row.receiptId} hash {row.hash}
+              <span data-testid="tool-result" className="receipt-line">
+                <b>{row.tool}</b> receipt {row.receiptId} hash {row.hash}
               </span>
             )}
             {row.kind === "answer" && (
-              <div data-beui="message-bubble">
+              <div className="msg" data-beui="message-bubble">
                 <p>{row.content}</p>
-                {row.template && <p>template: {row.template}</p>}
+                {row.template && <p className="note">Routed to {row.template}</p>}
                 {row.citations.length > 0 && (
-                  <ul aria-label="citations">
+                  <ul aria-label="citations" className="citations">
                     {row.citations.map((c) => (
-                      <li key={c.receipt_id}>
-                        citation receipt {c.receipt_id} hash {c.data_hash}
+                      <li key={c.receipt_id} className="receipt-line">
+                        <b>receipt</b> {c.receipt_id} hash {c.data_hash}
                         {c.source_url ? ` source ${c.source_url}` : ""}
                       </li>
                     ))}
                   </ul>
                 )}
                 {row.template && (
-                  <div aria-label="approval-card">
+                  <div aria-label="approval-card" className="alert-actions">
                     <button
                       type="button"
+                      className="btn btn--primary"
                       disabled={!lastWatch}
                       onClick={() => void decide("approve")}
                     >
                       Approve alert
-                    </button>{" "}
+                    </button>
                     <button
                       type="button"
+                      className="btn btn--danger"
                       disabled={!lastWatch}
                       onClick={() => void decide("reject")}
                     >
                       Reject alert
                     </button>
-                    {decision && <span data-testid="chat-decision"> {decision}</span>}
+                    {decision && <span data-testid="chat-decision" className="note"> {decision}</span>}
                   </div>
                 )}
               </div>
             )}
-            {row.kind === "error" && <span>{row.text}</span>}
+            {row.kind === "error" && (
+              <span className="note note--error">{row.text}</span>
+            )}
           </li>
         ))}
       </ul>
       {degraded && (
-        <p data-testid="chat-degraded">
-          Chat is unavailable; the globe, watchlist, and alert panels below keep
-          working.
+        <p data-testid="chat-degraded" className="note note--warn">
+          Chat is unavailable; the globe, watchlist, and alert panels keep working.
         </p>
       )}
     </section>
@@ -232,17 +243,8 @@ function ChatInner() {
 }
 
 export default function ChatPanel() {
-  // Build-time kill-switch: the panel (and its CopilotKit context) mounts
-  // only when chat is enabled; panels render regardless.
+  // Build-time kill-switch: the panel mounts only when chat is enabled;
+  // panels render regardless.
   if (import.meta.env.VITE_CHAT_ENABLED === "0") return null;
-  try {
-    return (
-      <CopilotKit runtimeUrl="/api/copilot" agent="argus">
-        <ChatInner />
-      </CopilotKit>
-    );
-  } catch {
-    // A CopilotKit context failure must never blank the panels.
-    return <ChatInner />;
-  }
+  return <ChatInner />;
 }

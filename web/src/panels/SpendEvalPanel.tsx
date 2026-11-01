@@ -21,7 +21,18 @@ function CountUp({ value }: { value: number }) {
     return () => cancelAnimationFrame(raf.current);
   }, [value]);
   const done = shown === value;
-  return <span aria-label="number" data-testid="total-credits">{done ? value : shown}</span>;
+  return (
+    <span aria-label="number" data-testid="total-credits">
+      {done ? value : shown}
+    </span>
+  );
+}
+
+function probeState(status: string | undefined): string {
+  if (!status) return "";
+  if (/pass|ok|green/i.test(status)) return "probe-dot--pass";
+  if (/fail|red/i.test(status)) return "probe-dot--fail";
+  return "probe-dot--pending";
 }
 
 /** Spend + eval: tabbed spend ledger and eval-gate probe status. */
@@ -41,7 +52,7 @@ export default function SpendEvalPanel() {
         setEvalStatus(e);
       } catch (err) {
         if (!alive) return;
-        setNote(`spend/eval failed: ${String(err)}`);
+        setNote(`Spend and eval unavailable — ${err instanceof Error ? err.message : String(err)}`);
       }
     })();
     return () => {
@@ -51,12 +62,17 @@ export default function SpendEvalPanel() {
 
   const probes = evalStatus?.probes;
   const familyCount = (v: unknown): number => (Array.isArray(v) ? v.length : 0);
+  const precision = evalStatus
+    ? evalStatus.precision <= 1
+      ? `${Math.round(evalStatus.precision * 100)}%`
+      : `${Math.round(evalStatus.precision)}%`
+    : "—";
 
   return (
     <section aria-label="spend-eval">
       <h2>Spend + eval</h2>
-      {note && <p>{note}</p>}
-      <div role="tablist" aria-label="tabs">
+      {note && <p className="note note--error">{note}</p>}
+      <div role="tablist" aria-label="tabs" className="tabbar">
         <button
           type="button"
           role="tab"
@@ -75,62 +91,92 @@ export default function SpendEvalPanel() {
         </button>
       </div>
       {tab === "spend" && (
-        <div role="tabpanel">
+        <div role="tabpanel" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {spend ? (
             <>
-              <p>
-                total credits: <CountUp value={spend.total_credits} />
-              </p>
-              <table aria-label="table">
-                <thead>
-                  <tr>
-                    <th>Operation</th>
-                    <th>Model</th>
-                    <th>Tokens in</th>
-                    <th>Tokens out</th>
-                    <th>Cost credits</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {spend.calls.map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.operation}</td>
-                      <td>{c.model}</td>
-                      <td>{c.tokens_in}</td>
-                      <td>{c.tokens_out}</td>
-                      <td>{c.cost_credits}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="stat-row">
+                <div className="stat">
+                  <span className="stat-label">Total credits</span>
+                  <span className="stat-figure stat-figure--accent">
+                    <CountUp value={spend.total_credits} />
+                  </span>
+                  <span className="stat-sub">Meta Model API</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Calls</span>
+                  <span className="stat-figure">{spend.calls.length}</span>
+                  <span className="stat-sub">logged</span>
+                </div>
+              </div>
+              {spend.calls.length > 0 && (
+                <div className="table-scroll" style={{ maxHeight: 260 }}>
+                  <table aria-label="table" className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Operation</th>
+                        <th>Model</th>
+                        <th className="num">Tokens in</th>
+                        <th className="num">Tokens out</th>
+                        <th className="num">Credits</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {spend.calls.map((c) => (
+                        <tr key={c.id}>
+                          <td>{c.operation}</td>
+                          <td>{c.model}</td>
+                          <td className="num">{c.tokens_in}</td>
+                          <td className="num">{c.tokens_out}</td>
+                          <td className="num">{c.cost_credits}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </>
           ) : (
-            !note && <p>loading spend…</p>
+            !note && <p className="note">Loading spend</p>
           )}
         </div>
       )}
       {tab === "eval" && (
-        <div role="tabpanel">
+        <div role="tabpanel" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {evalStatus ? (
             <>
-              <p data-testid="eval-precision">
-                hits {evalStatus.hits} misses {evalStatus.misses} total {evalStatus.total}{" "}
-                precision {evalStatus.precision} — probes {evalStatus.probes.status}
-              </p>
-              <ul>
+              <div className="stat-row">
+                <div className="stat">
+                  <span className="stat-label">Precision</span>
+                  <span className="stat-figure stat-figure--accent" data-testid="eval-precision">
+                    {precision}
+                  </span>
+                  <span className="stat-sub">
+                    {evalStatus.hits} hits · {evalStatus.misses} misses of {evalStatus.total}
+                  </span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Probes</span>
+                  <span className="stat-figure">{evalStatus.probes.status}</span>
+                  <span className="stat-sub">eval gate</span>
+                </div>
+              </div>
+              <ul className="probe-list">
                 <li>
-                  replay: {familyCount(probes?.replay)} — {probes?.status}
+                  <span className={`probe-dot ${probeState(probes?.status)}`} aria-hidden="true" />
+                  replay · {familyCount(probes?.replay)} probes
                 </li>
                 <li>
-                  false_positive: {familyCount(probes?.false_positive)} — {probes?.status}
+                  <span className={`probe-dot ${probeState(probes?.status)}`} aria-hidden="true" />
+                  false positive · {familyCount(probes?.false_positive)} probes
                 </li>
                 <li>
-                  novel_question: {familyCount(probes?.novel_question)} — {probes?.status}
+                  <span className={`probe-dot ${probeState(probes?.status)}`} aria-hidden="true" />
+                  novel question · {familyCount(probes?.novel_question)} probes
                 </li>
               </ul>
             </>
           ) : (
-            !note && <p>loading eval…</p>
+            !note && <p className="note">Loading eval</p>
           )}
         </div>
       )}

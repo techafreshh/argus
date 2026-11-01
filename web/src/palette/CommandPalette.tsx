@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { previewTemplate, type AskPreview } from "../api";
 import MissingDataCard from "./MissingDataCard";
 
 const DEMO_REGION = { type: "bbox", coords: [24, -12.5, 30, -8] } as const;
+
+/** Catalog-backed examples: every one routes to a real pipeline. */
+const EXAMPLES = [
+  "Is flooding worsening here?",
+  "Any active fire anomalies this week?",
+  "Is a drought developing here?",
+] as const;
 
 /** ⌘K command palette routing typed questions through POST /api/ask. */
 export default function CommandPalette() {
@@ -10,6 +18,7 @@ export default function CommandPalette() {
   const [question, setQuestion] = useState("Is vegetation declining?");
   const [result, setResult] = useState<AskPreview | null>(null);
   const [note, setNote] = useState("");
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -26,7 +35,7 @@ export default function CommandPalette() {
   }, []);
 
   const ask = useCallback(async () => {
-    setNote("loading…");
+    setFailed(false);
     try {
       const preview = await previewTemplate(
         question,
@@ -34,46 +43,80 @@ export default function CommandPalette() {
         "daily",
       );
       setResult(preview);
-      setNote(preview.template ? `template: ${preview.template}` : "template: unrouted");
+      setNote("");
     } catch (err) {
-      setNote(`ask failed: ${String(err)}`);
+      setNote(`Ask failed — ${err instanceof Error ? err.message : String(err)}`);
+      setFailed(true);
     }
   }, [question]);
 
   return (
     <>
-      <button type="button" aria-label="open command palette" onClick={() => setOpen(true)}>
-        ⌘K Ask…
+      <button
+        type="button"
+        className="btn btn--quiet"
+        aria-label="open command palette"
+        onClick={() => setOpen(true)}
+      >
+        Ask the Earth <span className="kbd">⌘K</span>
       </button>
-      {open && (
-        <div data-beui="command-palette" role="dialog" aria-label="command palette">
-          <div className="palette-dialog">
-            <div data-beui="morphing-search">
-              <input
-                aria-label="ask anything"
-                autoFocus
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void ask();
-                }}
-                placeholder="Ask anything…"
-              />
-              <button type="button" onClick={() => void ask()}>
-                Ask
-              </button>
-              <button type="button" aria-label="close command palette" onClick={() => setOpen(false)}>
-                Close
-              </button>
+      {open &&
+        // Portal: the overlay must escape the animated main column, or the
+        // entrance transform traps the fixed positioning inside the topbar.
+        createPortal(
+          <div data-beui="command-palette" role="dialog" aria-label="command palette">
+            <div className="palette-dialog">
+              <div data-beui="morphing-search">
+                <input
+                  aria-label="ask anything"
+                  autoFocus
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void ask();
+                  }}
+                  placeholder="Ask the Earth"
+                />
+                <span className="kbd" aria-hidden="true">
+                  Enter
+                </span>
+                <button type="button" className="btn btn--primary" onClick={() => void ask()}>
+                  Ask
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--quiet"
+                  aria-label="close command palette"
+                  onClick={() => setOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+              {!result && (
+                <div className="palette-examples">
+                  <span className="palette-examples-label">Try</span>
+                  {EXAMPLES.map((q) => (
+                    <button key={q} type="button" className="tag" onClick={() => setQuestion(q)}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {note && (
+                <p data-testid="palette-status" className={failed ? "note note--error" : "note"}>
+                  {note}
+                </p>
+              )}
+              {result && result.template && (
+                <pre className="dump" data-testid="palette-plan">
+                  {JSON.stringify(result, null, 2)}
+                </pre>
+              )}
+              {result && !result.template && <MissingDataCard preview={result} />}
             </div>
-            {note && <p data-testid="palette-status">{note}</p>}
-            {result && result.template && (
-              <pre data-testid="palette-plan">{JSON.stringify(result, null, 2)}</pre>
-            )}
-            {result && !result.template && <MissingDataCard preview={result} />}
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

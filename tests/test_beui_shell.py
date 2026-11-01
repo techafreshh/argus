@@ -27,6 +27,9 @@ def _bundle_js() -> str:
     for asset in sorted((STATIC / "assets").glob("*.js")):
         chunks.append(asset.read_text(encoding="utf-8", errors="replace"))
     index = (STATIC / "index.html").read_text(encoding="utf-8")
+    # Styles ship as separate CSS assets; scan them so token contracts hold.
+    for asset in sorted((STATIC / "assets").glob("*.css")):
+        chunks.append(asset.read_text(encoding="utf-8", errors="replace"))
     # Inline-module scripts are bundled; also scan index.html itself.
     return "\n".join([index, *chunks])
 
