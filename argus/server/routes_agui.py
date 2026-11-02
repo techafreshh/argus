@@ -26,6 +26,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from starlette.responses import StreamingResponse
 
+from argus.adapters import mem0_client
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.router import abstain_receipt, route
 from argus.store.db import get_connection, init_db
@@ -236,6 +237,35 @@ def _frame(event: dict) -> str:
     return "data: " + json.dumps(event, sort_keys=True, default=str) + "\n\n"
 
 
+def _recall(question: str, watch_id: str) -> list[dict]:
+    """Durable memories relevant to this question; [] when memory is off."""
+    try:
+        return mem0_client.search_memories(question, watch_id=watch_id)
+    except Exception:  # noqa: BLE001 - memory must never break a run
+        return []
+
+
+def _store_run_memory(
+    question: str, answer: str, template: str | None, watch_id: str, thread_id: str
+) -> None:
+    """Persist this exchange for future chats; no-op when memory is off."""
+    try:
+        mem0_client.remember(
+            [
+                {"role": "user", "content": question},
+                {"role": "assistant", "content": answer[:1500]},
+            ],
+            metadata={
+                "kind": "chat_run",
+                "template": str(template or ""),
+                "thread_id": thread_id,
+            },
+            watch_id=watch_id,
+        )
+    except Exception:  # noqa: BLE001, S110 - memory must never break a run
+        pass
+
+
 def _run_frames(
     question: str, region: dict, cadence: str, thread_id: str
 ) -> Iterator[str]:
@@ -289,6 +319,7 @@ def _run_frames(
                     "watch_id": watch_id,
                     "receipt_id": receipt["id"],
                     "citations": [],
+                    "memories": [],
                 }
             )
             yield _frame({"type": "run_finished", "ok": True, "abstained": True})
@@ -304,6 +335,7 @@ def _run_frames(
                 {"question": question, "template": "unrouted"},
                 {"answer": info["answer"]},
             )
+            memories = _recall(question, watch_id)
             yield _frame(
                 {
                     "type": "tool_call",
@@ -336,8 +368,10 @@ def _run_frames(
                     "watch_id": watch_id,
                     "receipt_id": receipt["id"],
                     "citations": [],
+                    "memories": memories,
                 }
             )
+            _store_run_memory(question, info["answer"], None, watch_id, thread_id)
             yield _frame({"type": "run_finished", "ok": True, "abstained": True})
             return
         plan_obj = make_plan(question, region, cadence)
@@ -356,6 +390,7 @@ def _run_frames(
             {"question": question, "template": str(template)},
             {"template": str(template), "plan": plan_dict},
         )
+        memories = _recall(question, watch_id)
         yield _frame(
             {
                 "type": "tool_result",
@@ -386,7 +421,15 @@ def _run_frames(
                         "source_url": receipt["source_url"],
                     }
                 ],
+                "memories": memories,
             }
+        )
+        _store_run_memory(
+            question,
+            f"Template {template}: plan ready.",
+            str(template),
+            watch_id,
+            thread_id,
         )
         yield _frame(
             {

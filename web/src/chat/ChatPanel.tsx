@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { approveAlert, listAlerts, rejectAlert } from "../api";
-import { streamChat, type AguiEvent } from "./chatClient";
+import { streamChat, type AguiEvent, type AguiMemory } from "./chatClient";
 
 type TodoItem = { label: string; detail: string; done: boolean };
 
@@ -42,6 +42,7 @@ function ChatInner() {
   const [degraded, setDegraded] = useState(false);
   const [lastWatch, setLastWatch] = useState("");
   const [decision, setDecision] = useState("");
+  const [memories, setMemories] = useState<AguiMemory[]>([]);
   const threadRef = useRef(crypto.randomUUID());
 
   const parseBbox = (): [number, number, number, number] | undefined => {
@@ -58,6 +59,7 @@ function ChatInner() {
     setBusy(true);
     setDegraded(false);
     setDecision("");
+    setMemories([]);
     setStatus("Planning");
     setRows((prev) => [...prev, { kind: "activity", text: `asking: ${question}` }]);
     const onEvent = (event: AguiEvent) => {
@@ -83,6 +85,9 @@ function ChatInner() {
       } else if (event.type === "message") {
         if (event.plan && typeof event.plan === "object") {
           setTodos(planTodos(event.plan as Record<string, unknown>));
+        }
+        if (event.memories && event.memories.length > 0) {
+          setMemories(event.memories);
         }
         setLastWatch(String(event.watch_id ?? ""));
         setRows((prev) => [
@@ -170,6 +175,16 @@ function ChatInner() {
         </div>
       </div>
       {status && <p data-testid="chat-status" className="note">{status}</p>}
+      {memories.length > 0 && (
+        <div aria-label="memory-chips" data-testid="memory-chips" className="memory-row">
+          <span className="memory-label">Remembered</span>
+          {memories.map((m) => (
+            <span key={m.id || m.memory} data-testid="memory-chip" className="beui-chip memory-chip">
+              {m.memory}
+            </span>
+          ))}
+        </div>
+      )}
       {todos.length > 0 && (
         <ol aria-label="todo-list" className="plan-list">
           {todos.map((t) => (

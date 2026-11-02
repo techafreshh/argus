@@ -13,6 +13,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field, field_validator
 
+from argus.adapters import mem0_client
 from argus.analysis.ndvi import fetch_ndvi
 from argus.analysis.sam_client import segment_concept
 from argus.eyes.fireline.alert import file_fire_alert
@@ -338,6 +339,23 @@ def create_watch(payload: WatchIn, response: Response) -> dict:
         conn.close()
     if payload.region is not None:
         response.status_code = 201
+    # Long memory: future chats recall what this room is watching (no-op
+    # without a key or offline).
+    mem0_client.remember(
+        [
+            {
+                "role": "user",
+                "content": (
+                    f"Operator started a watch named '{payload.name}' asking "
+                    f"'{payload.question}' over region "
+                    f"{json.dumps(region, sort_keys=True, default=str)} "
+                    f"at {payload.cadence} cadence."
+                ),
+            }
+        ],
+        metadata={"kind": "watch_created", "template": str(template)},
+        watch_id=watch_id,
+    )
     return {
         "ok": True,
         "id": watch_id,

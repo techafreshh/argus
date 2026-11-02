@@ -20,6 +20,12 @@ export type AguiCitation = {
   source_url: string;
 };
 
+export type AguiMemory = {
+  id: string;
+  memory: string;
+  score?: number | null;
+};
+
 export type AguiEvent =
   | { type: "run_started"; threadId: string; question: string; agent: string }
   | { type: "tool_call"; tool: string; input: Record<string, unknown> }
@@ -33,6 +39,7 @@ export type AguiEvent =
       watch_id?: string;
       receipt_id?: string;
       citations?: AguiCitation[];
+      memories?: AguiMemory[];
     }
   | { type: "run_finished"; ok: boolean; error?: string; [key: string]: unknown };
 

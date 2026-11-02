@@ -6,6 +6,7 @@ from argus.adapters import (
     firms,
     gdelt,
     imagery,
+    mem0_client,
     modis_burned,
     oisst,
     openmeteo,
@@ -35,6 +36,7 @@ from argus.adapters.era5 import ERA5Adapter, fetch_wind_era5
 from argus.adapters.firms import FIRMSAdapter, fetch_fires
 from argus.adapters.gdelt import GDELTAdapter, search_news
 from argus.adapters.imagery import fetch_imagery
+from argus.adapters.mem0_client import remember, search_memories
 from argus.adapters.modis_burned import MODISBurnedAdapter, fetch_burned
 from argus.adapters.oisst import OISSTAdapter, fetch_sst
 from argus.adapters.openmeteo import OpenMeteoAdapter, fetch_wind
@@ -82,15 +84,18 @@ __all__ = [
     "imagery",
     "is_offline",
     "make_receipt",
+    "mem0_client",
     "modis_burned",
     "oisst",
     "openmeteo",
     "overpass",
     "read_fixture",
+    "remember",
     "resolve_cache_dir",
     "s1",
     "s2",
     "s5p",
+    "search_memories",
     "search_news",
     "viirs",
     "wikidata",

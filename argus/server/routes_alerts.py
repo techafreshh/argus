@@ -9,6 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
+from argus.adapters import mem0_client
 from argus.reports.ledger import log_prediction
 from argus.reports.render import file_report
 from argus.store.db import get_connection, init_db
@@ -186,6 +187,21 @@ def approve_alert(alert_id: str) -> dict:
     alert["decided_at"] = now
     alert["alert_id"] = alert["id"]
     _file_report_for_alert(alert)
+    # Long memory: future chats recall what the operator approved.
+    mem0_client.remember(
+        [
+            {
+                "role": "user",
+                "content": (
+                    f"Operator approved the alert '{alert['title']}' "
+                    f"(confidence {float(alert['confidence']):.0%}) for watch "
+                    f"{alert['watch_id']}; it became report {alert_id}."
+                ),
+            }
+        ],
+        metadata={"kind": "alert_approved"},
+        watch_id=str(alert["watch_id"]),
+    )
     return {"ok": True, "id": alert_id, "status": "approved", "report_id": alert_id}
 
 
@@ -206,5 +222,20 @@ def reject_alert(alert_id: str) -> dict:
         conn.commit()
     finally:
         conn.close()
+    # Long memory: future chats recall what the operator chose to reject.
+    mem0_client.remember(
+        [
+            {
+                "role": "user",
+                "content": (
+                    f"Operator rejected the alert '{row['title']}' "
+                    f"(confidence {float(row['confidence']):.0%}) for watch "
+                    f"{row['watch_id']}; it will not become a report."
+                ),
+            }
+        ],
+        metadata={"kind": "alert_rejected"},
+        watch_id=str(row["watch_id"]),
+    )
     return {"ok": True, "id": alert_id, "status": "rejected"}
 

@@ -7,6 +7,8 @@ loop: **plan → acquire → analyze → verify → alert**. It plans its own sa
 acquisitions, pulls climate feeds, segments and detects change, cross-checks independent
 sources, and files graded intelligence reports with confidence scores. Alerts queue for
 human approval; every claim carries receipts; every prediction lands in a hit/miss ledger.
+Chat carries long memory via [Mem0](https://mem0.ai) — conversations, watch definitions,
+and approval decisions survive across sessions (graceful no-op without a key or offline).
 
 **Meta Global AI Developer Hackathon submission — live through Nov 8.**
 
