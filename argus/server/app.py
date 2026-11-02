@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -85,3 +85,16 @@ def index() -> str:
     if index_file.is_file():
         return index_file.read_text(encoding="utf-8")
     return _PLACEHOLDER
+
+
+@app.get("/{full_path:path}", response_class=HTMLResponse)
+def spa_fallback(full_path: str) -> Response:
+    # Client-side routing: unknown GET paths serve the SPA so deep links
+    # like /alerts work. API paths stay JSON 404s — the routers above have
+    # already matched everything real.
+    if full_path.startswith(("api", "api/", "assets", "assets/", "sst", "sst/")):
+        return JSONResponse(status_code=404, content={"detail": "Not Found"})
+    index_file = _STATIC_DIR / "index.html"
+    if index_file.is_file():
+        return index_file.read_text(encoding="utf-8")
+    return JSONResponse(status_code=404, content={"detail": "Not Found"})

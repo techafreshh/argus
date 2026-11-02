@@ -179,6 +179,7 @@ def test_bundle_hooks_and_no_fake_canvas_residual():
 def test_no_leak_words_in_first_party_sources_or_manifest():
     sources = [
         Path("web/src/App.tsx"),
+        Path("web/src/shell/enso-context.tsx"),
         Path("web/src/api.ts"),
         Path("web/src/panels/SstGlobe.tsx"),
         Path("web/src/index.css"),
@@ -190,5 +191,6 @@ def test_no_leak_words_in_first_party_sources_or_manifest():
         text = path.read_text(encoding="utf-8")
         for word in (*LEAK_WORDS, "synthetic", "fixture", "Fixture"):
             assert word not in text, f"{word} leaks in {path}"
-    src = Path("web/src/App.tsx").read_text(encoding="utf-8")
+    # The ENSO fetch lives in the shell context since the router revamp.
+    src = Path("web/src/shell/enso-context.tsx").read_text(encoding="utf-8")
     assert "getEnsoStatus" in src

@@ -68,9 +68,13 @@ def test_bundle_hooks_live_badge_and_no_fixture(tmp_path, monkeypatch):
 
 def test_app_source_wires_live_enso(tmp_path, monkeypatch):
     _setup_db(tmp_path, monkeypatch)
-    src = Path("web/src/App.tsx").read_text(encoding="utf-8")
+    # The ENSO fetch lives in the shared shell context since the router
+    # revamp (sidebar status card + globe page both read from it).
+    src = Path("web/src/shell/enso-context.tsx").read_text(encoding="utf-8")
     assert "getEnsoStatus" in src
     assert "ENSO_FIXTURE" not in src
+    wired = Path("web/src/App.tsx").read_text(encoding="utf-8")
+    assert "EnsoProvider" in wired
     api = Path("web/src/api.ts").read_text(encoding="utf-8")
     assert "getEnsoStatus" in api
     assert "ENSO_FIXTURE" not in api
