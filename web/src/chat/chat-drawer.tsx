@@ -7,9 +7,9 @@ import {
 	useState,
 	type ReactNode,
 } from "react";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer } from "@/components/motion/drawer";
 import { Loader } from "@/components/motion/loader";
-import { MessageCircleIcon } from "lucide-react";
+import { MessageCircleIcon, XIcon } from "lucide-react";
 
 const ChatPanel = lazy(() => import("./ChatPanel"));
 
@@ -42,22 +42,34 @@ export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 					<span className="chat-fab-label">Ask the Earth</span>
 				</button>
 			)}
-			<Sheet open={open} onOpenChange={setOpen}>
-				<SheetContent
-					side="right"
-					className="flex w-full flex-col gap-0 overflow-hidden p-4 sm:max-w-[560px]"
-				>
-					<SheetHeader className="pb-2">
-						<SheetTitle>Ask the Earth</SheetTitle>
-						<SheetDescription>
+			<Drawer
+				open={open}
+				onOpenChange={setOpen}
+				side="right"
+				ariaLabel="Ask the Earth"
+				className="w-full max-w-[85vw] gap-0 p-4 sm:w-[560px]"
+			>
+				<div className="flex shrink-0 items-start justify-between gap-3 pb-2">
+					<div>
+						<h2 className="font-semibold text-foreground">Ask the Earth</h2>
+						<p className="text-muted-foreground text-sm">
 							Plans, tool calls and receipts stream live over AG-UI.
-						</SheetDescription>
-					</SheetHeader>
-					<Suspense fallback={<Loader variant="dots" size={20} label="Loading chat" />}>
-						<ChatPanel />
-					</Suspense>
-				</SheetContent>
-			</Sheet>
+						</p>
+					</div>
+					<button
+						type="button"
+						aria-label="Close"
+						data-beui="drawer-close"
+						className="rounded-lg p-1.5 text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+						onClick={() => setOpen(false)}
+					>
+						<XIcon className="size-5" aria-hidden="true" />
+					</button>
+				</div>
+				<Suspense fallback={<Loader variant="dots" size={20} label="Loading chat" />}>
+					<ChatPanel />
+				</Suspense>
+			</Drawer>
 		</ChatDrawerContext.Provider>
 	);
 }
