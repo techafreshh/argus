@@ -50,9 +50,11 @@ def gate_request(path: str, method: str) -> dict | None:
     Returns ``{"kind": "open"}`` when the path needs no session, or the
     rejection shape ``{"kind": "api" | "page"}`` describing how to bounce an
     anonymous request: JSON 401 for API paths, a login redirect for pages.
+    The root shell stays open on purpose — link-preview crawlers never carry
+    a session, and the bare shell leaks no data (every data fetch 401s).
     """
     if (
-        path in ("/healthz", "/api/healthz")
+        path in ("/", "/healthz", "/api/healthz")
         or path in PUBLIC_FILES
         or path.startswith(("/api/auth/", "/assets/", "/sst/"))
     ):

@@ -63,10 +63,13 @@ def test_armed_gate_locks_writes_reads_and_the_shell(monkeypatch) -> None:
     # reads are locked too: the dashboard is for signed-in operators
     assert client.get("/api/watches").status_code == 401
     assert client.get("/api/enso/status").status_code == 401
-    # the SPA shell bounces to GitHub sign-in
+    # the SPA shell bounces to GitHub sign-in (deep links, not the root)
     page = client.get("/watchlist", follow_redirects=False)
     assert page.status_code == 302, page.text[:200]
     assert "/api/auth/login" in page.headers["location"]
+    root = client.get("/")
+    assert root.status_code == 200  # preview crawlers need the bare shell
+    assert "og:image" in root.text and "og-image" in root.text
     # crawlers + uptime probes stay open
     assert client.get("/healthz").status_code == 200
     assert client.get("/api/healthz").status_code == 200
