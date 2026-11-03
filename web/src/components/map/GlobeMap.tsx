@@ -18,6 +18,11 @@ export type Bbox = [number, number, number, number];
 export const ESRI_DARK_TILES =
   "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
 
+/** Photographic basemap — continents render as real satellite imagery on the
+ * globe instead of a flat dark canvas. Public service, no key. */
+export const ESRI_SATELLITE_TILES =
+  "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
 /** Degrees per second of the demo-mode drift; a full lap takes ~2.4 min. */
 const SPIN_DEG_PER_S = 2.5;
 /** Quiet period after user interaction before the drift resumes. */
@@ -62,10 +67,10 @@ function buildStyle(globe: boolean): StyleSpecification {
     sources: {
       basemap: {
         type: "raster",
-        tiles: [ESRI_DARK_TILES],
+        tiles: [ESRI_SATELLITE_TILES],
         tileSize: 256,
-        maxzoom: 16,
-        attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
+        maxzoom: 17,
+        attribution: "Esri, Maxar, Earthstar Geographics",
       },
       aoi: { type: "geojson", data: EMPTY_COLLECTION },
     },

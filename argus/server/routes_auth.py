@@ -36,6 +36,32 @@ SESSION_TTL_S = 7 * 24 * 3600
 ALLOWED_NEXT = ("/", "/watchlist", "/alerts", "/reports", "/analogs", "/receipts",
                 "/toolbox", "/channels", "/spend-eval")
 
+# Files crawlers and browsers must reach without a session (link previews,
+# favicons). Every other path — the SPA shell and /api reads included —
+# needs a signed-in session while the gate is armed.
+PUBLIC_FILES = frozenset(
+    {"/favicon.svg", "/favicon-512.png", "/apple-touch-icon.png", "/og-image.jpg"}
+)
+
+
+def gate_request(path: str, method: str) -> dict | None:
+    """Decision helper for the whole-app gate (armed mode only).
+
+    Returns ``{"kind": "open"}`` when the path needs no session, or the
+    rejection shape ``{"kind": "api" | "page"}`` describing how to bounce an
+    anonymous request: JSON 401 for API paths, a login redirect for pages.
+    """
+    if (
+        path in ("/healthz", "/api/healthz")
+        or path in PUBLIC_FILES
+        or path.startswith(("/api/auth/", "/assets/", "/sst/"))
+    ):
+        return {"kind": "open"}
+    cleaned = path.rstrip("/") or "/"
+    if cleaned.startswith("/api"):
+        return {"kind": "api"}
+    return {"kind": "page"}
+
 
 def _env(key: str) -> str:
     return os.environ.get(key, "").strip()

@@ -328,9 +328,8 @@ button {
   gap: 12px;
 }
 
-.sst-wrap [data-testid="globe-map"] {
-  height: 360px;
-}
+/* The globe sizes itself with the clamp in SstGlobe (fills the viewport below
+   the readout strip); no fixed height here or it stays cramped. */
 
 .sst-controls {
   display: flex;

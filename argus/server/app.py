@@ -5,13 +5,14 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from argus.scheduler.cadence import start_scheduler, stop_scheduler
 from argus.server.routes_agui import router as agui_router
 from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
+from argus.server.routes_auth import auth_enabled, current_user, gate_request
 from argus.server.routes_auth import router as auth_router
 from argus.server.routes_channels import router as channels_router
 from argus.server.routes_enso import router as enso_router
@@ -35,6 +36,25 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="ARGUS", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def dashboard_gate(request: Request, call_next):
+    """Whole-app GitHub gate while armed: SPA pages bounce to sign-in, API
+    paths 401, crawlers (`og-image`, favicons), healthz and auth endpoints
+    stay open. No-op until the GitHub OAuth keys exist."""
+    if auth_enabled():
+        decision = gate_request(request.url.path, request.method)
+        if decision["kind"] != "open" and current_user(request) is None:
+            if decision["kind"] == "page" and request.method in ("GET", "HEAD"):
+                return RedirectResponse(
+                    f"/api/auth/login?next={request.url.path}", status_code=302
+                )
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Sign in with GitHub to use ARGUS."},
+            )
+    return await call_next(request)
 
 # Create the database synchronously at import so plain `TestClient(app)`
 # usage (without lifespan) still sees `data/argus.db`; the lifespan hook
@@ -97,9 +117,14 @@ def index() -> str:
 def spa_fallback(full_path: str) -> Response:
     # Client-side routing: unknown GET paths serve the SPA so deep links
     # like /alerts work. API paths stay JSON 404s — the routers above have
-    # already matched everything real.
+    # already matched everything real. Real files in the bundle root
+    # (favicons, og-image) are served as themselves for crawlers.
     if full_path.startswith(("api", "api/", "assets", "assets/", "sst", "sst/")):
         return JSONResponse(status_code=404, content={"detail": "Not Found"})
+    if not full_path.startswith(".."):
+        candidate = (_STATIC_DIR / full_path).resolve()
+        if candidate.is_file() and _STATIC_DIR.resolve() in candidate.parents:
+            return FileResponse(candidate)
     index_file = _STATIC_DIR / "index.html"
     if index_file.is_file():
         return index_file.read_text(encoding="utf-8")

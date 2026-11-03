@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "cinetic": {
+      "source": "Leonxlnx/cinetic",
+      "sourceType": "github",
+      "skillPath": "skills/cinetic/SKILL.md",
+      "computedHash": "963c985987ee175e2b8b24ba3f18e8953275928972fd2acc64ac8322f5a9ff6e"
+    },
     "create-readme": {
       "source": "github/awesome-copilot",
       "sourceType": "github",

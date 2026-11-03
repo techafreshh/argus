@@ -50,7 +50,7 @@ def test_disabled_by_default_writes_pass() -> None:
     assert status["enabled"] is False
 
 
-def test_armed_gate_blocks_writes_and_opens_reads(monkeypatch) -> None:
+def test_armed_gate_locks_writes_reads_and_the_shell(monkeypatch) -> None:
     _arm(monkeypatch)
     client = _client()
     blocked = client.post(
@@ -60,13 +60,18 @@ def test_armed_gate_blocks_writes_and_opens_reads(monkeypatch) -> None:
     assert blocked.status_code == 401
     assert "Sign in with GitHub" in blocked.json()["detail"]
     assert client.post("/api/ask", json={"question": "hello"}).status_code == 401
-    assert client.post(
-        "/api/channels", json={"target": "https://hooks.example.com/x"}
-    ).status_code == 401
-    # reads stay open for judges
-    assert client.get("/api/watches").status_code == 200
-    assert client.get("/api/alerts").status_code == 200
-    assert client.get("/api/enso/status").status_code == 200
+    # reads are locked too: the dashboard is for signed-in operators
+    assert client.get("/api/watches").status_code == 401
+    assert client.get("/api/enso/status").status_code == 401
+    # the SPA shell bounces to GitHub sign-in
+    page = client.get("/watchlist", follow_redirects=False)
+    assert page.status_code == 302, page.text[:200]
+    assert "/api/auth/login" in page.headers["location"]
+    # crawlers + uptime probes stay open
+    assert client.get("/healthz").status_code == 200
+    assert client.get("/api/healthz").status_code == 200
+    og = client.get("/og-image.jpg")
+    assert og.status_code in (200, 404)  # 404 only if the asset is not shipped yet
 
 
 def test_armed_gate_accepts_signed_session(monkeypatch) -> None:

@@ -106,7 +106,9 @@ export default function SstGlobe() {
     <div className="sst-wrap">
       <GlobeMap
         testId="globe-map"
-        style={{ height: 260 }}
+        // Fill the space below the room's readout strip instead of a fixed
+        // cramped 260px window; clamped so it never collapses on short views.
+        style={{ height: "clamp(460px, calc(100vh - 330px), 860px)" }}
         autoRotate
         onReady={onReady}
         fallback={
