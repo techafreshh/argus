@@ -5,6 +5,7 @@ import {
 	getPresets,
 	type Preset,
 } from "../api";
+import BboxPicker, { type Bbox } from "../components/map/BboxPicker";
 
 const STORAGE_KEY = "argus.onboarded";
 
@@ -35,6 +36,9 @@ export default function OnboardingWizard() {
 	const [webhookUrl, setWebhookUrl] = useState("");
 	const [webhookNote, setWebhookNote] = useState("");
 	const [webhookOk, setWebhookOk] = useState<boolean | null>(null);
+	const [customBbox, setCustomBbox] = useState<Bbox | null>(null);
+	const [customQuestion, setCustomQuestion] = useState("Is vegetation declining here?");
+	const [customStarting, setCustomStarting] = useState(false);
 
 	useEffect(() => {
 		if (!isOnboarded()) setVisible(true);
@@ -82,6 +86,29 @@ export default function OnboardingWizard() {
 			setNote(`Could not start the watch — ${errText(err)}`);
 		} finally {
 			setStarting(null);
+		}
+	};
+
+	const startCustom = async () => {
+		if (!customBbox) return;
+		setCustomStarting(true);
+		setFailed(false);
+		setNote("");
+		try {
+			const question = customQuestion.trim() || "What is changing here?";
+			await createWatch({
+				name: "Custom region · drawn",
+				region: { type: "bbox", coords: customBbox },
+				question,
+				cadence: "daily",
+			});
+			setNote(`Watch started over ${customBbox.map((n) => n.toFixed(2)).join(", ")}.`);
+			setStep(3);
+		} catch (err) {
+			setFailed(true);
+			setNote(`Could not start the watch — ${errText(err)}`);
+		} finally {
+			setCustomStarting(false);
 		}
 	};
 
@@ -161,10 +188,39 @@ export default function OnboardingWizard() {
 									</button>
 								</li>
 							))}
-							{presets.length === 0 && !note && (
-								<li className="note">Loading cookbook presets…</li>
-							)}
+						{presets.length === 0 && !note && (
+							<li className="note">Loading cookbook presets…</li>
+						)}
 						</ul>
+						<details className="wizard-custom" data-testid="wizard-custom-region">
+							<summary className="field-label">Or point anywhere — draw a region on the globe</summary>
+							<div className="wizard-custom-body">
+								<BboxPicker
+									value={customBbox}
+									onChange={setCustomBbox}
+									onClear={() => setCustomBbox(null)}
+									height={220}
+								/>
+								<label className="field">
+									<span className="field-label">Question</span>
+									<input
+										className="input"
+										aria-label="custom watch question"
+										data-beui="input"
+										value={customQuestion}
+										onChange={(e) => setCustomQuestion(e.target.value)}
+									/>
+								</label>
+								<button
+									type="button"
+									className="btn btn--primary"
+									disabled={!customBbox || customStarting}
+									onClick={() => void startCustom()}
+								>
+									{customStarting ? "Starting…" : "Start drawn watch"}
+								</button>
+							</div>
+						</details>
 						<div className="wizard-actions">
 							<button type="button" className="btn btn--quiet" onClick={finish}>
 								Skip — I&rsquo;ll browse first

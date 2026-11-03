@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "../beui";
 import { PageHeader } from "../shell/page-header";
+import BboxPicker, { type Bbox } from "../components/map/BboxPicker";
 import {
 	createWatch,
 	getPresets,
@@ -103,6 +104,19 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
 		Number(bbox.maxLat),
 	];
 
+	const parsed = useMemo<Bbox | null>(() => {
+		const nums = [bbox.minLon, bbox.minLat, bbox.maxLon, bbox.maxLat].map(Number);
+		return nums.every((n) => Number.isFinite(n)) ? (nums as Bbox) : null;
+	}, [bbox]);
+
+	const setParsed = (next: Bbox) =>
+		setBbox({
+			minLon: String(next[0]),
+			minLat: String(next[1]),
+			maxLon: String(next[2]),
+			maxLat: String(next[3]),
+		});
+
 	const doPreview = async () => {
 		setStatus("Previewing");
 		setFailed(false);
@@ -160,6 +174,15 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
 						onChange={(e) => setQuestion(e.target.value)}
 					/>
 				</label>
+				<div className="field span-2">
+					<span className="field-label">Region</span>
+					<BboxPicker
+						value={parsed}
+						onChange={setParsed}
+						onClear={() => setBbox(BLANK)}
+						height={240}
+					/>
+				</div>
 				{(
 					[
 						["minLon", "Min lon"],

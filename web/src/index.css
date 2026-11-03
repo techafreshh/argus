@@ -1221,22 +1221,6 @@ textarea[data-beui="input"] {
   }
 }
 /* ===================== Freeform composer + FAB ===================== */
-.chat-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  flex: 1;
-  gap: 0;
-}
-.chat-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 8px;
-}
 .composer {
   display: flex;
   gap: 8px;
@@ -1293,6 +1277,52 @@ textarea[data-beui="input"] {
   .chat-fab:hover {
     transform: none;
   }
+}
+
+/* ===================== Globe map chrome ===================== */
+.maplibregl-ctrl-group {
+  background: #0a0c11 !important;
+  border: 1px solid rgb(242 244 248 / 14%);
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.maplibregl-ctrl-group button {
+  background-color: transparent !important;
+}
+.maplibregl-ctrl-group button:hover {
+  background-color: #14171e !important;
+}
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid rgb(242 244 248 / 9%) !important;
+}
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(0.85);
+}
+.maplibregl-ctrl-attrib {
+  background: rgb(0 0 0 / 55%) !important;
+  color: #7a8195;
+  font-size: 10px;
+}
+.maplibregl-ctrl-attrib a {
+  color: #a8aec0;
+}
+.wizard-custom {
+  margin-top: 14px;
+  border-top: 1px solid rgb(242 244 248 / 9%);
+  padding-top: 12px;
+}
+.wizard-custom > summary {
+  cursor: pointer;
+  color: var(--cool);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.wizard-custom-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
 }
 
 /* ===================== Onboarding wizard ===================== */

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { useCallback, useEffect, useState } from "react";
+import type { Map as MlMap } from "maplibre-gl";
+import GlobeMap from "../components/map/GlobeMap";
 import { getSstManifest, type SstFrame } from "../api";
 
 /** Nino3.4 overlay corners: [[-170,5],[-120,5],[-120,-5],[-170,-5]]. */
@@ -26,13 +26,13 @@ function frameUrl(month: string): string {
 
 /** Monthly SST-anomaly globe: pre-rendered frames over the Nino3.4 band. */
 export default function SstGlobe() {
-  const divRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const [map, setMap] = useState<MlMap | null>(null);
   const [frames, setFrames] = useState<SstFrame[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(true);
-  const [mapFailed, setMapFailed] = useState(false);
   const [note, setNote] = useState("");
+
+  const onReady = useCallback((m: MlMap) => setMap(m), []);
 
   useEffect(() => {
     let alive = true;
@@ -56,69 +56,28 @@ export default function SstGlobe() {
     };
   }, []);
 
+  // Install the frame overlay once both the map and the manifest exist.
   useEffect(() => {
-    if (!frames || frames.length === 0) return;
-    const el = divRef.current;
-    if (!el) return;
-    let map: maplibregl.Map | null = null;
+    const last = frames?.[frames.length - 1];
+    if (!map || !last) return;
     try {
-      map = new maplibregl.Map({
-        container: el,
-        style: {
-          version: 8,
-          sources: {
-            basemap: {
-              type: "raster",
-              tiles: [
-                "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-              ],
-              tileSize: 256,
-              maxzoom: 16,
-              attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
-            },
-          },
-          layers: [{ id: "basemap", type: "raster", source: "basemap" }],
-        },
-        center: [-145, 0],
-        zoom: 1.6,
-      });
-      const globe = { type: "globe" as const };
-      try {
-        (map as unknown as { setProjection(p: unknown): void }).setProjection(globe);
-      } catch {
-        /* older renderers ignore globe projection */
+      if (!map.getSource("sst")) {
+        map.addSource("sst", {
+          type: "image",
+          url: frameUrl(last.month),
+          coordinates: SST_COORDS,
+        });
+        map.addLayer({
+          id: "sst-layer",
+          type: "raster",
+          source: "sst",
+          paint: { "raster-opacity": 0.85 },
+        });
       }
-      map.on("load", () => {
-        try {
-          map?.addSource("sst", {
-            type: "image",
-            url: frameUrl(frames[frames.length - 1].month),
-            coordinates: SST_COORDS,
-          });
-          map?.addLayer({
-            id: "sst-layer",
-            type: "raster",
-            source: "sst",
-            paint: { "raster-opacity": 0.85 },
-          });
-        } catch {
-          /* overlay is decorative; the basemap still paints */
-        }
-      });
-      mapRef.current = map;
     } catch {
-      /* WebGL unavailable in headless probes: still-image fallback below */
-      setMapFailed(true);
+      /* overlay is decorative; the basemap still paints */
     }
-    return () => {
-      try {
-        map?.remove();
-      } catch {
-        /* noop */
-      }
-      if (mapRef.current === map) mapRef.current = null;
-    };
-  }, [frames]);
+  }, [map, frames]);
 
   useEffect(() => {
     if (!frames || frames.length === 0 || !playing) return;
@@ -129,7 +88,6 @@ export default function SstGlobe() {
   }, [frames, playing]);
 
   useEffect(() => {
-    const map = mapRef.current;
     const frame = frames?.[idx];
     if (!map || !frame) return;
     try {
@@ -140,21 +98,27 @@ export default function SstGlobe() {
     } catch {
       /* source not ready yet; the next tick retries */
     }
-  }, [frames, idx]);
+  }, [map, frames, idx]);
 
   const current = frames?.[idx] ?? null;
 
   return (
     <div className="sst-wrap">
-      <div ref={divRef} data-testid="globe-map" style={{ height: 260 }}>
-        {mapFailed && current && (
-          <img
-            src={frameUrl(current.month)}
-            alt={`SST anomaly ${current.month}`}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        )}
-      </div>
+      <GlobeMap
+        testId="globe-map"
+        style={{ height: 260 }}
+        autoRotate
+        onReady={onReady}
+        fallback={
+          current && (
+            <img
+              src={frameUrl(current.month)}
+              alt={`SST anomaly ${current.month}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          )
+        }
+      />
       {current && (
         <div className="sst-controls">
           <button

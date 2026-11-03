@@ -45,7 +45,7 @@ export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 			<Sheet open={open} onOpenChange={setOpen}>
 				<SheetContent
 					side="right"
-					className="flex w-full flex-col gap-0 overflow-hidden p-4 sm:max-w-[520px]"
+					className="flex w-full flex-col gap-0 overflow-hidden p-4 sm:max-w-[560px]"
 				>
 					<SheetHeader className="pb-2">
 						<SheetTitle>Ask the Earth</SheetTitle>

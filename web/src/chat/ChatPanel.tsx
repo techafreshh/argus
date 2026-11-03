@@ -1,24 +1,45 @@
 import { useRef, useState } from "react";
+import {
+  AgentActivity,
+  type AgentActivityItem,
+} from "@/components/agents/agent-activity";
+import { ApprovalCard } from "@/components/agents/approval-card";
+import { Citations } from "@/components/agents/citations";
+import {
+  Message,
+  MessageContent,
+  MessageGroup,
+  MessageFooter,
+} from "@/components/agents/message";
+import { MessageBubble } from "@/components/agents/message-bubble";
+import { MessageScroller } from "@/components/agents/message-scroller";
+import { PromptInput } from "@/components/agents/prompt-input";
+import { TodoList } from "@/components/agents/todo-list";
+import { ToolResult } from "@/components/agents/tool-result";
+import { ThinkingShimmer } from "@/components/agents/loading-states/thinking-shimmer";
 import { approveAlert, listAlerts, rejectAlert } from "../api";
 import { streamChat, type AguiEvent, type AguiMemory } from "./chatClient";
 
-type TodoItem = { label: string; detail: string; done: boolean };
+type PlanTodo = { label: string; detail: string; done: boolean };
+
+type Citation = { receipt_id: string; data_hash: string; source_url: string };
+
+type Receipt = { id: string; tool: string; hash: string };
+
+type Decision = { state: "idle" | "submitting" | "approved" | "rejected"; note: string };
 
 type TranscriptRow =
-  | { kind: "activity"; text: string }
-  | { kind: "tool"; tool: string; receiptId: string; hash: string }
+  | { kind: "user"; content: string }
   | {
       kind: "answer";
       content: string;
       template: string | null;
       recipeTitle: string | null;
-      watchId: string;
-      receiptId: string;
-      citations: { receipt_id: string; data_hash: string; source_url: string }[];
+      citations: Citation[];
     }
   | { kind: "error"; text: string };
 
-function planTodos(plan: Record<string, unknown>): TodoItem[] {
+function planTodos(plan: Record<string, unknown>): PlanTodo[] {
   const steps: Array<[string, unknown]> = [
     ["sensor", plan.sensor],
     ["aoi", plan.aoi],
@@ -33,59 +54,73 @@ function planTodos(plan: Record<string, unknown>): TodoItem[] {
   }));
 }
 
+function receiptBody(tool: string, id: string, hash: string): string {
+  return `tool      ${tool}\nreceipt   ${id}\ndata_hash ${hash}`;
+}
+
 function ChatInner() {
   const [draft, setDraft] = useState("");
-  const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [todos, setTodos] = useState<PlanTodo[]>([]);
+  const [activity, setActivity] = useState<AgentActivityItem[]>([]);
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [rows, setRows] = useState<TranscriptRow[]>([]);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [degraded, setDegraded] = useState(false);
   const [lastWatch, setLastWatch] = useState("");
-  const [decision, setDecision] = useState("");
+  const [decision, setDecision] = useState<Decision>({ state: "idle", note: "" });
   const [memories, setMemories] = useState<AguiMemory[]>([]);
+  const [runCount, setRunCount] = useState(0);
   const threadRef = useRef(crypto.randomUUID());
-  const composerRef = useRef<HTMLTextAreaElement | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const activeStepRef = useRef<string | null>(null);
 
-  // Auto-grow the composer with its content (capped by CSS max-height).
-  const resizeComposer = () => {
-    const el = composerRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
-  };
-
-  const ask = async (text: string) => {
+  const ask = (text: string) => {
     const question = text.trim();
     if (busy || !question) return;
     setBusy(true);
     setDegraded(false);
-    setDecision("");
+    setDecision({ state: "idle", note: "" });
     setMemories([]);
     setStatus("Planning");
     setDraft("");
-    requestAnimationFrame(resizeComposer);
-    setRows((prev) => [...prev, { kind: "activity", text: `asking: ${question}` }]);
+    setTodos([]);
+    setReceipts([]);
+    setActivity([]);
+    setRunCount((n) => n + 1);
+    setRows((prev) => [...prev, { kind: "user", content: question }]);
+    let seq = 0;
     const onEvent = (event: AguiEvent) => {
       if (event.type === "tool_call") {
         const input = event.input ?? {};
         const plan = (input.plan ?? input) as Record<string, unknown>;
         if (plan && typeof plan === "object") setTodos(planTodos(plan));
-        setRows((prev) => [
+        const stepId = `call-${runCount}-${seq++}`;
+        activeStepRef.current = stepId;
+        setActivity((prev) => [
           ...prev,
-          { kind: "activity", text: `tool call ${event.tool}` },
+          { id: stepId, type: "step", label: event.tool, status: "active" },
         ]);
       } else if (event.type === "tool_result") {
         setTodos((prev) => prev.map((t) => ({ ...t, done: true })));
-        setRows((prev) => [
+        setReceipts((prev) => [
           ...prev,
           {
-            kind: "tool",
+            id: event.receipt.id,
             tool: event.tool,
-            receiptId: event.receipt.id,
             hash: event.receipt.data_hash,
           },
         ]);
+        const stepId = activeStepRef.current;
+        if (stepId) {
+          activeStepRef.current = null;
+          setActivity((prev) =>
+            prev.map((item) =>
+              item.type === "step" && item.id === stepId
+                ? { ...item, status: "complete" }
+                : item,
+            ),
+          );
+        }
       } else if (event.type === "message") {
         if (event.plan && typeof event.plan === "object") {
           setTodos(planTodos(event.plan as Record<string, unknown>));
@@ -101,8 +136,6 @@ function ChatInner() {
             content: event.content,
             template: (event.template as string | null) ?? null,
             recipeTitle: (event.recipe_title as string | null) ?? null,
-            watchId: String(event.watch_id ?? ""),
-            receiptId: String(event.receipt_id ?? ""),
             citations: event.citations ?? [],
           },
         ]);
@@ -120,146 +153,259 @@ function ChatInner() {
         }
       }
     };
-    await streamChat(question, onEvent, { threadId: threadRef.current });
+    void streamChat(question, onEvent, { threadId: threadRef.current });
   };
 
   const decide = async (kind: "approve" | "reject") => {
-    setDecision("Deciding");
+    setDecision({ state: "submitting", note: "Deciding" });
     try {
       const alerts = await listAlerts();
       const target = alerts.find(
         (a) => a.watch_id === lastWatch && a.status === "queued",
       );
       if (!target) {
-        setDecision("No queued alert for this run yet");
+        setDecision({ state: "idle", note: "No queued alert for this run yet" });
         return;
       }
       if (kind === "approve") await approveAlert(target.id);
       else await rejectAlert(target.id);
-      setDecision(kind === "approve" ? "Approved" : "Rejected");
+      setDecision({
+        state: kind === "approve" ? "approved" : "rejected",
+        note: kind === "approve" ? "Approved" : "Rejected",
+      });
     } catch (err) {
-      setDecision(`Decision failed — ${err instanceof Error ? err.message : String(err)}`);
+      setDecision({
+        state: "idle",
+        note: `Decision failed — ${err instanceof Error ? err.message : String(err)}`,
+      });
     }
   };
 
   return (
-    <section aria-label="chat" className="chat-shell" data-beui="chat-panel">
-      <div className="chat-scroll" ref={scrollRef}>
-        {status && <p data-testid="chat-status" className="note">{status}</p>}
-        {memories.length > 0 && (
-          <div aria-label="memory-chips" data-testid="memory-chips" className="memory-row">
-            <span className="memory-label">Remembered</span>
-            {memories.map((m) => (
-              <span key={m.id || m.memory} data-testid="memory-chip" className="beui-chip memory-chip">
-                {m.memory}
-              </span>
-            ))}
-          </div>
-        )}
-        {todos.length > 0 && (
-          <ol aria-label="todo-list" className="plan-list">
-            {todos.map((t) => (
-              <li key={t.label} className={t.done ? "is-done" : undefined}>
-                <span className="plan-check" aria-hidden="true" />
-                <span className="plan-key">{t.label}</span>
-                <span>{t.detail}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-        <ul aria-label="agent-activity" className="activity-list">
-          {rows.map((row, i) => (
-            <li key={i} style={{ listStyle: "none" }}>
-              {row.kind === "activity" && <span className="note">{row.text}</span>}
-              {row.kind === "tool" && (
-                <span data-testid="tool-result" className="receipt-line">
-                  <b>{row.tool}</b> receipt {row.receiptId} hash {row.hash}
-                </span>
-              )}
-              {row.kind === "answer" && (
-                <div className="msg" data-beui="message-bubble">
-                  <p>{row.content}</p>
-                  {row.template && (
-                    <p className="note">
-                      Followed recipe <b>{row.recipeTitle ?? row.template}</b>
-                    </p>
-                  )}
-                  {row.citations.length > 0 && (
-                    <ul aria-label="citations" className="citations">
-                      {row.citations.map((c) => (
-                        <li key={c.receipt_id} className="receipt-line">
-                          <b>receipt</b> {c.receipt_id} hash {c.data_hash}
-                          {c.source_url ? ` source ${c.source_url}` : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {row.template && (
-                    <div aria-label="approval-card" className="alert-actions">
-                      <button
-                        type="button"
-                        className="btn btn--primary"
-                        disabled={!lastWatch}
-                        onClick={() => void decide("approve")}
-                      >
-                        Approve alert
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn--danger"
-                        disabled={!lastWatch}
-                        onClick={() => void decide("reject")}
-                      >
-                        Reject alert
-                      </button>
-                      {decision && <span data-testid="chat-decision" className="note"> {decision}</span>}
+    <section
+      aria-label="chat"
+      data-beui="chat-panel"
+      className="flex min-h-0 min-w-0 flex-1 flex-col"
+    >
+      <MessageScroller
+        className="min-h-0 min-w-0 flex-1 pb-3"
+        viewportClassName="overflow-x-hidden"
+        busy={busy}
+      >
+        <MessageGroup spacing="compact" className="min-w-0">
+          {rows.map((row, i) => {
+            if (row.kind === "user") {
+              return (
+                <Message key={i} from="user">
+                  <MessageContent>
+                    <MessageBubble variant="tint">{row.content}</MessageBubble>
+                  </MessageContent>
+                </Message>
+              );
+            }
+            if (row.kind === "error") {
+              return (
+                <Message key={i} from="assistant">
+                  <MessageContent>
+                    <MessageBubble variant="danger">{row.text}</MessageBubble>
+                  </MessageContent>
+                </Message>
+              );
+            }
+            return (
+              <Message key={i} from="assistant">
+                <MessageContent>
+                  <MessageBubble
+                    variant="soft"
+                    data-beui="message-bubble"
+                    className="max-w-full"
+                  >
+                    <p>{row.content}</p>
+                    {row.template && (
+                      <p className="mt-1 text-muted-foreground text-xs">
+                        Followed recipe{" "}
+                        <b className="text-foreground/90">
+                          {row.recipeTitle ?? row.template}
+                        </b>
+                      </p>
+                    )}
+                    {row.citations.length > 0 && (
+                      <div aria-label="citations" className="mt-2">
+                        <Citations
+                          title="Receipts"
+                          citations={row.citations.map((c) => ({
+                            id: c.receipt_id,
+                            title: `receipt ${c.receipt_id}`,
+                            domain: c.source_url
+                              ? new URL(c.source_url, window.location.origin).host
+                              : undefined,
+                            url: c.source_url || undefined,
+                            icon: <ReceiptGlyph />,
+                          }))}
+                        />
+                      </div>
+                    )}
+                  </MessageBubble>
+                </MessageContent>
+                {row.template && (
+                  <MessageFooter className="mt-2">
+                    <div aria-label="approval-card" className="min-w-0">
+                      <ApprovalCard
+                        title="Deliver the queued alert?"
+                        description={
+                          lastWatch
+                            ? `Watch ${lastWatch} — nothing publishes without your sign-off.`
+                            : "Waiting for the watch id from this run."
+                        }
+                        approveLabel="Approve alert"
+                        status={
+                          decision.state === "idle" ? "pending" : decision.state
+                        }
+                        onApprove={() => void decide("approve")}
+                        onReject={() => void decide("reject")}
+                        result={
+                          decision.note ? (
+                            <span data-testid="chat-decision">{decision.note}</span>
+                          ) : undefined
+                        }
+                      />
+                      {decision.note && decision.state === "idle" && (
+                        <span
+                          data-testid="chat-decision"
+                          className="mt-1 block text-muted-foreground text-xs"
+                        >
+                          {decision.note}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
-              {row.kind === "error" && (
-                <span className="note note--error">{row.text}</span>
-              )}
-            </li>
+                  </MessageFooter>
+                )}
+              </Message>
+            );
+          })}
+        </MessageGroup>
+      </MessageScroller>
+
+      {status && (
+        <div
+          data-testid="chat-status"
+          className="flex h-7 shrink-0 items-center text-muted-foreground text-sm"
+        >
+          {busy ? (
+            <ThinkingShimmer>{status}</ThinkingShimmer>
+          ) : (
+            <span>{status}</span>
+          )}
+        </div>
+      )}
+
+      {memories.length > 0 && (
+        <div
+          aria-label="memory-chips"
+          data-testid="memory-chips"
+          className="memory-row shrink-0"
+        >
+          <span className="memory-label">Remembered</span>
+          {memories.map((m) => (
+            <span
+              key={m.id || m.memory}
+              data-testid="memory-chip"
+              className="beui-chip memory-chip"
+            >
+              {m.memory}
+            </span>
           ))}
-        </ul>
-      </div>
-      <div role="search" aria-label="chat-prompt" data-beui="prompt-input" className="composer">
-        <textarea
-          ref={composerRef}
-          className="input composer-input"
+        </div>
+      )}
+
+      {todos.length > 0 && (
+        <TodoList
+          title="Plan"
+          items={todos.map((t) => ({
+            id: t.label,
+            title: t.label,
+            detail: t.detail,
+            status: t.done ? "completed" : "in-progress",
+          }))}
+          className="min-w-0 shrink-0"
+          maxHeight={130}
+        />
+      )}
+
+      {activity.length > 0 && (
+        <div aria-label="agent-activity" className="min-w-0 shrink-0">
+          <AgentActivity
+            items={activity}
+            status={busy ? "working" : "complete"}
+            activeLabel={status || "Working…"}
+            maxHeight={150}
+          />
+        </div>
+      )}
+
+      {receipts.length > 0 && (
+        <div className="flex min-w-0 shrink-0 flex-col gap-1.5 pt-1">
+          {receipts.map((r) => (
+            <div key={`${r.id}-${r.tool}`} data-testid="tool-result" className="min-w-0">
+              <ToolResult
+                tool={r.tool}
+                title="receipt"
+                status="success"
+                meta={`hash ${r.hash.slice(0, 16)}`}
+                maxHeight={140}
+                className="min-w-0 text-xs"
+                copyText={receiptBody(r.tool, r.id, r.hash)}
+              >
+                <pre className="overflow-x-hidden font-mono text-[11px] leading-5 break-all whitespace-pre-wrap text-muted-foreground">
+                  {receiptBody(r.tool, r.id, r.hash)}
+                </pre>
+              </ToolResult>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div
+        role="search"
+        aria-label="chat-prompt"
+        data-beui="prompt-input"
+        className="mt-3 min-w-0 shrink-0 border-border/60 border-t pt-3"
+      >
+        <PromptInput
+          value={draft}
+          onValueChange={setDraft}
+          onSubmit={ask}
+          loading={busy}
+          minRows={1}
+          maxRows={5}
+          placeholder="Ask the Earth anything — e.g. is the Niger delta flooding?"
           aria-label="chat question"
           data-beui="input"
-          rows={1}
-          placeholder="Ask the Earth anything — e.g. is the Niger delta flooding?"
-          value={draft}
-          disabled={busy}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            resizeComposer();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void ask(draft);
-            }
-          }}
+          disabled={false}
         />
-        <button
-          type="button"
-          className="btn btn--primary composer-send"
-          onClick={() => void ask(draft)}
-          disabled={busy || !draft.trim()}
-        >
-          {busy ? "Streaming" : "Ask"}
-        </button>
       </div>
+
       {degraded && (
-        <p data-testid="chat-degraded" className="note note--warn">
+        <p data-testid="chat-degraded" className="note note--warn mt-2 shrink-0">
           Chat is unavailable; the globe, watchlist, and alert panels keep working.
         </p>
       )}
     </section>
+  );
+}
+
+function ReceiptGlyph() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+    >
+      <path d="M4 1.5h8v13l-2-1.4-2 1.4-2-1.4-2 1.4v-13z" />
+      <path d="M6 5.5h4M6 8h4M6 10.5h2" />
+    </svg>
   );
 }
 
