@@ -261,7 +261,7 @@ function ChatInner({ initialQuestion }: { initialQuestion?: string | null }) {
             }
             return (
               <Message key={i} from="assistant">
-                <MessageAvatar className="text-cool">
+                <MessageAvatar className="text-[var(--cool)]">
                   <LogoIcon className="size-4" />
                 </MessageAvatar>
                 <MessageContent>
@@ -340,7 +340,7 @@ function ChatInner({ initialQuestion }: { initialQuestion?: string | null }) {
           })}
           {busy && rows[rows.length - 1]?.kind === "user" && (
             <Message from="assistant">
-              <MessageAvatar className="text-cool">
+              <MessageAvatar className="text-[var(--cool)]">
                 <LogoIcon className="size-4" />
               </MessageAvatar>
               <MessageContent>

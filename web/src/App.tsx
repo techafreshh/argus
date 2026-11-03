@@ -2,6 +2,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "@/components/app-shell";
 import { EnsoProvider } from "@/shell/enso-context";
 import OnboardingWizard from "./onboarding/OnboardingWizard";
+import { ChatDrawerProvider } from "@/chat/chat-drawer";
 import GlobePage from "./pages/GlobePage";
 import WatchlistPage from "./pages/WatchlistPage";
 import AlertsPage from "./pages/AlertsPage";
@@ -25,7 +26,8 @@ export default function App() {
 	if (gate === "signin") return <SignInScreen />;
 
 	return (
-		<EnsoProvider>
+		<ChatDrawerProvider>
+	<EnsoProvider>
 			<AppShell pathname={pathname}>
 				<Routes>
 					<Route path="/" element={<GlobePage />} />
@@ -42,5 +44,6 @@ export default function App() {
 			</AppShell>
 			<OnboardingWizard />
 		</EnsoProvider>
+		</ChatDrawerProvider>
 	);
 }

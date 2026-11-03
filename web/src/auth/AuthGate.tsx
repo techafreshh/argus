@@ -51,7 +51,7 @@ export function SignInScreen() {
 		>
 			<div className="flex flex-col items-center gap-6 px-6 text-center">
 				<div className="flex flex-col items-center gap-3">
-					<LogoIcon className="size-20 text-cool" />
+					<LogoIcon className="size-20 text-[var(--cool)]" />
 					<h1 className="font-semibold tracking-[0.35em] text-foreground text-xl">
 						ARGUS
 					</h1>

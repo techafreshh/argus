@@ -17,9 +17,7 @@ if (el) {
     <React.StrictMode>
       <BrowserRouter>
         <TooltipProvider delayDuration={200}>
-          <ChatDrawerProvider>
-            <App />
-          </ChatDrawerProvider>
+          <App />
         </TooltipProvider>
       </BrowserRouter>
     </React.StrictMode>,
