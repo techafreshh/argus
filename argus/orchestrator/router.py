@@ -57,6 +57,13 @@ _CAPABILITY_PHRASES: tuple[str, ...] = (
     "how does this work",
     "what do you measure",
     "what can i ask",
+    "dashboard",
+    "sections of",
+    "this app",
+    "this site",
+    "this chat",
+    "this room",
+    "this tool",
 )
 
 _GREETING_WORDS = frozenset(

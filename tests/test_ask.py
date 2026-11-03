@@ -149,3 +149,11 @@ def test_routed_and_abstained_receipts_persisted():
         "/api/ask", json={"question": "Is gold smuggling rising in West Africa?"}
     ).json()
     assert abstained["receipt_id"] in _receipt_ids(abstained["watch_id"])
+
+def test_router_smalltalk_covers_app_meta_without_swallowing_forecasts():
+    from argus.orchestrator.router import smalltalk_reply
+
+    assert smalltalk_reply("What are the dashboard sections about?") is not None
+    assert smalltalk_reply("how does this work?") is not None
+    # forecast-style asks must still abstain honestly, never tour the app
+    assert smalltalk_reply("What are the odds of rain in Lagos next week?") is None
