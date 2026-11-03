@@ -199,9 +199,7 @@ Wikidata · NOAA CPC ONI table (validation snapshot)
 
 ---
 
-*Built by [pi-dark-factory](https://github.com/techafreshh/pi-dark-factory) — an unattended
-agent factory delivering each feature as a reviewed, scenario-verified PR, with **Muse Spark**
-as the factory model. At runtime the product runs on the Meta Model API: Muse Spark plans and
-interprets, SAM 3.1 is the eyes.*
+*At runtime ARGUS runs on the Meta Model API: **Muse Spark** plans and interprets,
+**SAM 3.1** is the eyes.*
 
 *"A hundred eyes. One brief. Ask the Earth anything."*
