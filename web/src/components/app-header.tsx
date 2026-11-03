@@ -39,7 +39,7 @@ export function AppHeader({ pathname }: { pathname?: string }) {
 					aria-label="open chat"
 					size="icon"
 					variant="ghost"
-					onClick={openChat}
+					onClick={() => openChat()}
 				>
 					<MessageSquareIcon />
 				</Button>

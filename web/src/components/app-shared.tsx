@@ -7,6 +7,7 @@ import {
 	HistoryIcon,
 	ListPlusIcon,
 	ReceiptTextIcon,
+	WebhookIcon,
 	WrenchIcon,
 } from "lucide-react";
 
@@ -42,7 +43,10 @@ export const navGroups: SidebarNavGroup[] = [
 	},
 	{
 		label: "System",
-		items: [{ title: "Spend & eval", path: "/spend-eval", icon: <GaugeIcon /> }],
+		items: [
+			{ title: "Channels", path: "/channels", icon: <WebhookIcon /> },
+			{ title: "Spend & eval", path: "/spend-eval", icon: <GaugeIcon /> },
+		],
 	},
 ];
 

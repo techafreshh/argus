@@ -56,3 +56,10 @@ def test_toolbox_page_ships() -> None:
     assert 'data-testid":"toolbox-summary"' in bundle
     # the nav entry is present
     assert "/toolbox" in bundle
+
+
+def test_channels_page_ships() -> None:
+    bundle = _bundle()
+    assert "/channels" in bundle
+    assert 'data-testid":"channels-page"' in bundle
+    assert 'aria-label":"webhook channel target"' in bundle

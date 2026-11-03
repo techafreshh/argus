@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AgentActivity,
   type AgentActivityItem,
@@ -7,9 +7,12 @@ import { ApprovalCard } from "@/components/agents/approval-card";
 import { Citations } from "@/components/agents/citations";
 import {
   Message,
+  MessageAvatar,
   MessageContent,
-  MessageGroup,
   MessageFooter,
+  MessageGroup,
+  MessageHeader,
+  MessageTyping,
 } from "@/components/agents/message";
 import { MessageBubble } from "@/components/agents/message-bubble";
 import { MessageScroller } from "@/components/agents/message-scroller";
@@ -18,6 +21,7 @@ import { TodoList } from "@/components/agents/todo-list";
 import { ToolResult } from "@/components/agents/tool-result";
 import { ThinkingShimmer } from "@/components/agents/loading-states/thinking-shimmer";
 import { approveAlert, listAlerts, rejectAlert } from "../api";
+import { LogoIcon } from "../components/logo";
 import { streamChat, type AguiEvent, type AguiMemory } from "./chatClient";
 
 type PlanTodo = { label: string; detail: string; done: boolean };
@@ -28,16 +32,20 @@ type Receipt = { id: string; tool: string; hash: string };
 
 type Decision = { state: "idle" | "submitting" | "approved" | "rejected"; note: string };
 
+const stamp = () =>
+  new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 type TranscriptRow =
-  | { kind: "user"; content: string }
+  | { kind: "user"; content: string; ts: string }
   | {
       kind: "answer";
       content: string;
       template: string | null;
       recipeTitle: string | null;
       citations: Citation[];
+      ts: string;
     }
-  | { kind: "error"; text: string };
+  | { kind: "error"; text: string; ts: string };
 
 function planTodos(plan: Record<string, unknown>): PlanTodo[] {
   const steps: Array<[string, unknown]> = [
@@ -58,7 +66,7 @@ function receiptBody(tool: string, id: string, hash: string): string {
   return `tool      ${tool}\nreceipt   ${id}\ndata_hash ${hash}`;
 }
 
-function ChatInner() {
+function ChatInner({ initialQuestion }: { initialQuestion?: string | null }) {
   const [draft, setDraft] = useState("");
   const [todos, setTodos] = useState<PlanTodo[]>([]);
   const [activity, setActivity] = useState<AgentActivityItem[]>([]);
@@ -73,6 +81,16 @@ function ChatInner() {
   const [runCount, setRunCount] = useState(0);
   const threadRef = useRef(crypto.randomUUID());
   const activeStepRef = useRef<string | null>(null);
+  const seededRef = useRef(false);
+
+  // A question handed over from the ⌘K palette asks itself on first mount;
+  // the drawer clears the seed on close, so the panel identity stays stable.
+  useEffect(() => {
+    if (!initialQuestion || seededRef.current) return;
+    seededRef.current = true;
+    ask(initialQuestion);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const ask = (text: string) => {
     const question = text.trim();
@@ -87,7 +105,10 @@ function ChatInner() {
     setReceipts([]);
     setActivity([]);
     setRunCount((n) => n + 1);
-    setRows((prev) => [...prev, { kind: "user", content: question }]);
+    setRows((prev) => [
+      ...prev,
+      { kind: "user", content: question, ts: stamp() },
+    ]);
     let seq = 0;
     const onEvent = (event: AguiEvent) => {
       if (event.type === "tool_call") {
@@ -137,6 +158,7 @@ function ChatInner() {
             template: (event.template as string | null) ?? null,
             recipeTitle: (event.recipe_title as string | null) ?? null,
             citations: event.citations ?? [],
+            ts: stamp(),
           },
         ]);
       } else if (event.type === "run_finished") {
@@ -146,7 +168,11 @@ function ChatInner() {
           setStatus("");
           setRows((prev) => [
             ...prev,
-            { kind: "error", text: String(event.error ?? "stream failed") },
+            {
+              kind: "error",
+              text: String(event.error ?? "stream failed"),
+              ts: stamp(),
+            },
           ]);
         } else {
           setStatus("Run finished");
@@ -197,7 +223,13 @@ function ChatInner() {
             if (row.kind === "user") {
               return (
                 <Message key={i} from="user">
+                  <MessageAvatar>O</MessageAvatar>
                   <MessageContent>
+                    <MessageHeader>
+                      You
+                      <span aria-hidden="true">·</span>
+                      <span className="tabular-nums">{row.ts}</span>
+                    </MessageHeader>
                     <MessageBubble variant="tint">{row.content}</MessageBubble>
                   </MessageContent>
                 </Message>
@@ -206,7 +238,15 @@ function ChatInner() {
             if (row.kind === "error") {
               return (
                 <Message key={i} from="assistant">
+                  <MessageAvatar className="bg-destructive/15 text-destructive">
+                    !
+                  </MessageAvatar>
                   <MessageContent>
+                    <MessageHeader>
+                      ARGUS
+                      <span aria-hidden="true">·</span>
+                      <span className="tabular-nums">{row.ts}</span>
+                    </MessageHeader>
                     <MessageBubble variant="danger">{row.text}</MessageBubble>
                   </MessageContent>
                 </Message>
@@ -214,7 +254,15 @@ function ChatInner() {
             }
             return (
               <Message key={i} from="assistant">
+                <MessageAvatar className="text-cool">
+                  <LogoIcon className="size-4" />
+                </MessageAvatar>
                 <MessageContent>
+                  <MessageHeader>
+                    ARGUS
+                    <span aria-hidden="true">·</span>
+                    <span className="tabular-nums">{row.ts}</span>
+                  </MessageHeader>
                   <MessageBubble
                     variant="soft"
                     data-beui="message-bubble"
@@ -246,43 +294,53 @@ function ChatInner() {
                       </div>
                     )}
                   </MessageBubble>
+                  {row.template && (
+                    <MessageFooter className="mt-1 w-full">
+                      <div aria-label="approval-card" className="min-w-0 w-full">
+                        <ApprovalCard
+                          title="Deliver the queued alert?"
+                          description={
+                            lastWatch
+                              ? `Watch ${lastWatch} — nothing publishes without your sign-off.`
+                              : "Waiting for the watch id from this run."
+                          }
+                          approveLabel="Approve alert"
+                          status={
+                            decision.state === "idle" ? "pending" : decision.state
+                          }
+                          onApprove={() => void decide("approve")}
+                          onReject={() => void decide("reject")}
+                          result={
+                            decision.note ? (
+                              <span data-testid="chat-decision">{decision.note}</span>
+                            ) : undefined
+                          }
+                        />
+                        {decision.note && decision.state === "idle" && (
+                          <span
+                            data-testid="chat-decision"
+                            className="mt-1 block text-muted-foreground text-xs"
+                          >
+                            {decision.note}
+                          </span>
+                        )}
+                      </div>
+                    </MessageFooter>
+                  )}
                 </MessageContent>
-                {row.template && (
-                  <MessageFooter className="mt-2">
-                    <div aria-label="approval-card" className="min-w-0">
-                      <ApprovalCard
-                        title="Deliver the queued alert?"
-                        description={
-                          lastWatch
-                            ? `Watch ${lastWatch} — nothing publishes without your sign-off.`
-                            : "Waiting for the watch id from this run."
-                        }
-                        approveLabel="Approve alert"
-                        status={
-                          decision.state === "idle" ? "pending" : decision.state
-                        }
-                        onApprove={() => void decide("approve")}
-                        onReject={() => void decide("reject")}
-                        result={
-                          decision.note ? (
-                            <span data-testid="chat-decision">{decision.note}</span>
-                          ) : undefined
-                        }
-                      />
-                      {decision.note && decision.state === "idle" && (
-                        <span
-                          data-testid="chat-decision"
-                          className="mt-1 block text-muted-foreground text-xs"
-                        >
-                          {decision.note}
-                        </span>
-                      )}
-                    </div>
-                  </MessageFooter>
-                )}
               </Message>
             );
           })}
+          {busy && rows[rows.length - 1]?.kind === "user" && (
+            <Message from="assistant">
+              <MessageAvatar className="text-cool">
+                <LogoIcon className="size-4" />
+              </MessageAvatar>
+              <MessageContent>
+                <MessageTyping label="Measuring the Earth…" />
+              </MessageContent>
+            </Message>
+          )}
         </MessageGroup>
       </MessageScroller>
 
@@ -409,9 +467,13 @@ function ReceiptGlyph() {
   );
 }
 
-export default function ChatPanel() {
+export default function ChatPanel({
+  initialQuestion,
+}: {
+  initialQuestion?: string | null;
+} = {}) {
   // Build-time kill-switch: the panel mounts only when chat is enabled;
   // panels render regardless.
   if (import.meta.env.VITE_CHAT_ENABLED === "0") return null;
-  return <ChatInner />;
+  return <ChatInner initialQuestion={initialQuestion} />;
 }

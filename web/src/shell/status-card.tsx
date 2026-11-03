@@ -44,7 +44,7 @@ export function StatusCard() {
 				variant="link"
 				size="sm"
 				className="w-max px-0 text-xs"
-				onClick={openChat}
+				onClick={() => openChat()}
 			>
 				<MessageSquareIcon data-icon />
 				Ask the Earth

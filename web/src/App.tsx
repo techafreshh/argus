@@ -10,6 +10,7 @@ import ReportsPage from "./pages/ReportsPage";
 import SpendEvalPage from "./pages/SpendEvalPage";
 import AnalogsPage from "./pages/AnalogsPage";
 import ToolboxPage from "./pages/ToolboxPage";
+import ChannelsPage from "./pages/ChannelsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 /** The control room: one shell, one page per beat of the demo. */
@@ -27,6 +28,7 @@ export default function App() {
 					<Route path="/spend-eval" element={<SpendEvalPage />} />
 					<Route path="/analogs" element={<AnalogsPage />} />
 					<Route path="/toolbox" element={<ToolboxPage />} />
+					<Route path="/channels" element={<ChannelsPage />} />
 					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 			</AppShell>

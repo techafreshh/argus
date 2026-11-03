@@ -1,13 +1,38 @@
-import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+	BellIcon,
+	FileTextIcon,
+	GaugeIcon,
+	GlobeIcon,
+	HistoryIcon,
+	ListPlusIcon,
+	MessageCircleIcon,
+	OrbitIcon,
+	ReceiptTextIcon,
+	WebhookIcon,
+	WrenchIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import {
+	CommandPalette as BeUICommandPalette,
+	type CommandItem,
+} from "@/components/motion/command-palette";
 import { useChatDrawer } from "@/chat/chat-drawer";
-import { previewTemplate, type AskPreview } from "../api";
-import MissingDataCard from "./MissingDataCard";
 
-const DEMO_REGION = { type: "bbox", coords: [24, -12.5, 30, -8] } as const;
+/** Rooms and surfaces the palette can jump to. */
+const PLACES: Array<{ label: string; path: string; icon: CommandItem["icon"] }> = [
+	{ label: "Globe — live SST watch", path: "/", icon: GlobeIcon },
+	{ label: "Watchlist — add a watch", path: "/watchlist", icon: ListPlusIcon },
+	{ label: "Alerts — approval queue", path: "/alerts", icon: BellIcon },
+	{ label: "Reports — graded intelligence", path: "/reports", icon: FileTextIcon },
+	{ label: "Analogs — closest years", path: "/analogs", icon: HistoryIcon },
+	{ label: "Receipts — every tool call", path: "/receipts", icon: ReceiptTextIcon },
+	{ label: "Toolbox — source registry", path: "/toolbox", icon: WrenchIcon },
+	{ label: "Channels — webhook delivery", path: "/channels", icon: WebhookIcon },
+	{ label: "Spend & eval — budget, probes", path: "/spend-eval", icon: GaugeIcon },
+];
 
 /** Catalog-backed examples: every one routes to a real pipeline. */
 const EXAMPLES = [
@@ -16,60 +41,54 @@ const EXAMPLES = [
 	"Is a drought developing here?",
 ] as const;
 
-const PLACES = [
-	{ label: "Globe", path: "/" },
-	{ label: "Watchlist", path: "/watchlist" },
-	{ label: "Alerts", path: "/alerts" },
-	{ label: "Reports", path: "/reports" },
-	{ label: "Analogs", path: "/analogs" },
-	{ label: "Receipts", path: "/receipts" },
-	{ label: "Spend & eval", path: "/spend-eval" },
-] as const;
-
-/** ⌘K command palette: navigate the room, or route a typed question through POST /api/ask. */
+/** ⌘K: jump anywhere, or ask ARGUS a question (streams into the chat dock).
+ * Fuzzy filter, grouped results, keyboard cursor — beUI command palette. */
 export function CommandPalette() {
 	const [open, setOpen] = useState(false);
-	const [question, setQuestion] = useState("Is vegetation declining?");
-	const [result, setResult] = useState<AskPreview | null>(null);
-	const [note, setNote] = useState("");
-	const [failed, setFailed] = useState(false);
+	const [query, setQuery] = useState("");
 	const navigate = useNavigate();
 	const { openChat } = useChatDrawer();
 
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			const mod = e.metaKey || e.ctrlKey;
-			if (mod && (e.key === "k" || e.key === "K")) {
-				e.preventDefault();
-				setOpen((v) => !v);
-			} else if (e.key === "Escape") {
-				setOpen(false);
-			}
-		};
-		window.addEventListener("keydown", onKey);
-		return () => window.removeEventListener("keydown", onKey);
-	}, []);
-
-	const ask = useCallback(async () => {
-		setFailed(false);
-		try {
-			const preview = await previewTemplate(
-				question,
-				{ type: "bbox", coords: [...DEMO_REGION.coords] },
-				"daily",
-			);
-			setResult(preview);
-			setNote("");
-		} catch (err) {
-			setNote(`Ask failed — ${err instanceof Error ? err.message : String(err)}`);
-			setFailed(true);
-		}
-	}, [question]);
-
-	const go = (path: string) => {
-		setOpen(false);
-		navigate(path);
-	};
+	const question = query.trim();
+	const items: CommandItem[] = [
+		...(question
+			? [
+					{
+						id: "ask-argus",
+						label: `Ask ARGUS — “${question}”`,
+						group: "Ask the Earth",
+						keywords: ["question", "ask", "chat", "pipeline"],
+						icon: OrbitIcon,
+						hint: "Enter",
+						onSelect: () => openChat(question),
+					},
+				]
+			: []),
+		{
+			id: "open-chat",
+			label: "Open the chat dock",
+			group: "Ask the Earth",
+			keywords: ["chat", "conversation", "ag-ui"],
+			icon: MessageCircleIcon,
+			onSelect: () => openChat(),
+		},
+		...EXAMPLES.map((example, i) => ({
+			id: `example-${i}`,
+			label: example,
+			group: "Try one",
+			keywords: ["example", "recipe"],
+			icon: OrbitIcon,
+			onSelect: () => openChat(example),
+		})),
+		...PLACES.map((place) => ({
+			id: `go-${place.path}`,
+			label: place.label,
+			group: "Go to",
+			keywords: ["navigate", "page", "room"],
+			icon: place.icon,
+			onSelect: () => navigate(place.path),
+		})),
+	];
 
 	return (
 		<>
@@ -79,6 +98,7 @@ export function CommandPalette() {
 				size="sm"
 				className="gap-2 text-muted-foreground"
 				aria-label="open command palette"
+				data-beui="command-palette"
 				onClick={() => setOpen(true)}
 			>
 				Ask the Earth
@@ -87,79 +107,14 @@ export function CommandPalette() {
 					<Kbd>K</Kbd>
 				</KbdGroup>
 			</Button>
-			{open &&
-				// Portal: the overlay must escape the animated main column, or the
-				// entrance transform traps the fixed positioning inside the topbar.
-				createPortal(
-					<div data-beui="command-palette" role="dialog" aria-label="command palette">
-						<div className="palette-dialog">
-							<div data-beui="morphing-search">
-								<input
-									aria-label="ask anything"
-									autoFocus
-									value={question}
-									onChange={(e) => setQuestion(e.target.value)}
-									onKeyDown={(e) => {
-										if (e.key === "Enter") void ask();
-									}}
-									placeholder="Ask the Earth"
-								/>
-								<span className="kbd" aria-hidden="true">
-									Enter
-								</span>
-								<button type="button" className="btn btn--primary" onClick={() => void ask()}>
-									Ask
-								</button>
-								<button
-									type="button"
-									className="btn btn--quiet"
-									aria-label="close command palette"
-									onClick={() => setOpen(false)}
-								>
-									Close
-								</button>
-							</div>
-							<div className="palette-examples">
-								<span className="palette-examples-label">Go to</span>
-								{PLACES.map((p) => (
-									<button
-										key={p.path}
-										type="button"
-										className="tag"
-										onClick={() => go(p.path)}
-									>
-										{p.label}
-									</button>
-								))}
-								<button type="button" className="tag" onClick={() => { setOpen(false); openChat(); }}>
-									Open chat
-								</button>
-							</div>
-							{!result && (
-								<div className="palette-examples">
-									<span className="palette-examples-label">Try</span>
-									{EXAMPLES.map((q) => (
-										<button key={q} type="button" className="tag" onClick={() => setQuestion(q)}>
-											{q}
-										</button>
-									))}
-								</div>
-							)}
-							{note && (
-								<p data-testid="palette-status" className={failed ? "note note--error" : "note"}>
-									{note}
-								</p>
-							)}
-							{result && result.template && (
-								<pre className="dump" data-testid="palette-plan">
-									{JSON.stringify(result, null, 2)}
-								</pre>
-							)}
-							{result && !result.template && <MissingDataCard preview={result} />}
-						</div>
-					</div>,
-					document.body,
-				)}
+			<BeUICommandPalette
+				open={open}
+				onOpenChange={setOpen}
+				onQueryChange={setQuery}
+				items={items}
+				placeholder="Ask the Earth anything, or jump anywhere…"
+				emptyMessage="Type a question and press Enter to ask ARGUS."
+			/>
 		</>
 	);
 }

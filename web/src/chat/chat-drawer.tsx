@@ -13,7 +13,7 @@ import { MessageCircleIcon, XIcon } from "lucide-react";
 
 const ChatPanel = lazy(() => import("./ChatPanel"));
 
-type ChatDrawerState = { openChat: () => void };
+type ChatDrawerState = { openChat: (question?: string) => void };
 
 const ChatDrawerContext = createContext<ChatDrawerState>({ openChat: () => {} });
 
@@ -22,10 +22,20 @@ export function useChatDrawer(): ChatDrawerState {
 }
 
 /** Global "Ask the Earth" dock: the AG-UI conversation slides over any page.
- * A floating launcher sits bottom-right on every route. */
+ * A floating launcher sits bottom-right on every route; a `question` handed to
+ * `openChat` (e.g. from the ⌘K palette) asks itself on arrival. */
 export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 	const [open, setOpen] = useState(false);
-	const value = useMemo<ChatDrawerState>(() => ({ openChat: () => setOpen(true) }), []);
+	const [seed, setSeed] = useState<string | null>(null);
+	const value = useMemo<ChatDrawerState>(
+		() => ({
+			openChat: (question?: string) => {
+				setSeed(question ?? null);
+				setOpen(true);
+			},
+		}),
+		[],
+	);
 
 	return (
 		<ChatDrawerContext.Provider value={value}>
@@ -44,7 +54,12 @@ export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 			)}
 			<Drawer
 				open={open}
-				onOpenChange={setOpen}
+				onOpenChange={(next) => {
+					setOpen(next);
+					// The seed is a one-shot for this open; clearing it here keeps
+					// the panel's identity stable while the seeded run streams.
+					if (!next) setSeed(null);
+				}}
 				side="right"
 				ariaLabel="Ask the Earth"
 				className="w-full max-w-[85vw] gap-0 p-4 sm:w-[560px]"
@@ -67,7 +82,7 @@ export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 					</button>
 				</div>
 				<Suspense fallback={<Loader variant="dots" size={20} label="Loading chat" />}>
-					<ChatPanel />
+					<ChatPanel key={seed ?? "empty"} initialQuestion={seed} />
 				</Suspense>
 			</Drawer>
 		</ChatDrawerContext.Provider>
