@@ -1,129 +1,31 @@
-"""Fixed seven-pipeline template catalog (issue #9).
+"""Fixed seven-pipeline template catalog (issue #9), compiled from the cookbook.
 
-Single source of truth for plain-English question routing. Each entry
-holds substring keyword hints, whole-word hints, the backing
-sensor/tool name, and a one-line capability blurb. Matching order is
-:const:`TEMPLATE_NAMES`; vegetation sits last so broad decline
-language cannot shadow the more specific pipelines.
+The operator cookbook (``argus/cookbook/recipes.json``) is the single source of
+truth for language triggers, sensor pairing, and capability blurbs; this module
+compiles it into the plain dict/tuple shape the deterministic router has always
+consumed. Matching order is the cookbook order: specific pipelines first,
+vegetation last, so broad decline language cannot shadow the more specific
+pipelines.
 """
 
 from __future__ import annotations
 
-TEMPLATES: dict[str, dict[str, object]] = {
-    "ship_presence": {
-        "keywords": (
-            "vessel",
-            "boat",
-            "tanker",
-            "harbor",
-            "harbour",
-            "seaport",
-            "ferry",
-            "port traffic",
-            "port activity",
-            "container ship",
-        ),
-        "words": ("ship", "ships", "shipping"),
-        "sensor": "s1",
-        "blurb": "Find vessels and port activity in coastal waters.",
-    },
-    "fire_anomaly": {
-        "keywords": (
-            "wildfire",
-            "wild fire",
-            "burn scar",
-            "burned area",
-            "active fire",
-            "fire anomaly",
-            "thermal anomaly",
-        ),
-        "words": ("fire", "fires", "burning"),
-        "sensor": "s2",
-        "blurb": "Spot burn scars and active thermal anomalies.",
-    },
-    "flooding": {
-        "keywords": (
-            "flood",
-            "inundat",
-            "waterlog",
-            "deluge",
-            "river overflow",
-            "flash flood",
-        ),
-        "words": (),
-        "sensor": "s1",
-        "blurb": "Detect surface-water expansion after heavy rain.",
-    },
-    "drought": {
-        "keywords": (
-            "drought",
-            "desertif",
-            "dry spell",
-            "rainfall deficit",
-            "precipitation deficit",
-            "soil moisture",
-        ),
-        "words": ("arid",),
-        "sensor": "chirps",
-        "blurb": "Watch rainfall deficits and soil drying.",
-    },
-    "reservoir_change": {
-        "keywords": (
-            "reservoir",
-            "dam level",
-            "lake level",
-            "water storage",
-            "impoundment",
-            "dam storage",
-        ),
-        "words": ("dam",),
-        "sensor": "s1",
-        "blurb": "Measure reservoir and lake surface change.",
-    },
-    "dust_risk": {
-        "keywords": (
-            "dust storm",
-            "sandstorm",
-            "haboob",
-            "dust plume",
-            "aerosol optical",
-            "dust risk",
-        ),
-        "words": ("dust", "dusty", "sandstorm", "pm10"),
-        "sensor": "openmeteo",
-        "blurb": "Flag dust plumes and hazy air intrusions.",
-    },
-    "vegetation_decline": {
-        "keywords": (
-            "vegetat",
-            "ndvi",
-            "deforest",
-            "forest loss",
-            "forest cover",
-            "crop health",
-            "crop loss",
-            "crop failure",
-            "yield loss",
-            "yield decline",
-            "chlorophyll",
-            "leaf area",
-            "greenness",
-            "dieback",
-            "defoliat",
-        ),
-        "words": (),
-        "sensor": "s2",
-        "blurb": "Track greenness loss across seasons.",
-    },
-}
+from argus.cookbook import load_recipes
 
-# Deterministic matching order: specific pipelines first, vegetation last.
-TEMPLATE_NAMES: tuple[str, ...] = (
-    "ship_presence",
-    "fire_anomaly",
-    "flooding",
-    "drought",
-    "reservoir_change",
-    "dust_risk",
-    "vegetation_decline",
-)
+
+def _compile() -> tuple[dict[str, dict[str, object]], tuple[str, ...]]:
+    templates: dict[str, dict[str, object]] = {}
+    names: list[str] = []
+    for recipe in load_recipes():
+        name = str(recipe["id"])
+        templates[name] = {
+            "keywords": tuple(str(k) for k in recipe.get("keywords", ())),
+            "words": tuple(str(w) for w in recipe.get("words", ())),
+            "sensor": str(recipe.get("sensor", "")),
+            "blurb": str(recipe.get("blurb", "")),
+        }
+        names.append(name)
+    return templates, tuple(names)
+
+
+TEMPLATES, TEMPLATE_NAMES = _compile()

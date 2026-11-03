@@ -33,8 +33,9 @@ def _tables(path: Path) -> set[str]:
         conn.close()
 
 
-def test_schema_version_is_two() -> None:
-    assert SCHEMA_VERSION == 2
+def test_schema_version_is_current() -> None:
+    # 0003_alert_delivery.sql added channels + deliveries (v3).
+    assert SCHEMA_VERSION == 3
 
 
 def test_init_creates_all_tables(tmp_path: Path) -> None:

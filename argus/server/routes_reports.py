@@ -7,6 +7,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
+from argus.cookbook import recipe_for
 from argus.reports.render import file_report
 from argus.store.db import get_connection, init_db
 
@@ -119,3 +120,93 @@ def _with_live_linkage(card: dict, alert_row: Any) -> dict:
     card["evidence"] = alert["evidence"]
     card["decided_at"] = alert["decided_at"]
     return card
+
+
+@router.get("/api/reports/{report_id}/trace")
+def get_report_trace(report_id: str) -> dict:
+    """The decision log: how the agent got from question to graded report.
+
+    Assembles the routed recipe, the watch the run created, every receipt
+    (tool calls with params/hashes/sources), the approval decision, the
+    webhook deliveries, and the hit/miss ledger entry — in one replayable
+    timeline.
+    """
+    init_db()
+    conn = get_connection()
+    try:
+        alert_row = conn.execute(
+            "SELECT id, watch_id, report_id, title, confidence, status,"
+            " evidence_json, created_at, decided_at FROM alerts WHERE id = ?;",
+            (report_id,),
+        ).fetchone()
+        if alert_row is None or str(alert_row["status"]) != "approved":
+            raise HTTPException(status_code=404, detail="report not found")
+        watch_row = conn.execute(
+            "SELECT id, name, region_json, question, template, cadence, status,"
+            " created_at FROM watches WHERE id = ?;",
+            (str(alert_row["watch_id"]),),
+        ).fetchone()
+        receipts = [
+            _receipt_dict(row)
+            for row in conn.execute(
+                "SELECT id, watch_id, acquisition_id, tool, params_json,"
+                " source_url, data_hash, plot_path, token_usage, created_at"
+                " FROM receipts WHERE watch_id = ? ORDER BY created_at, rowid;",
+                (str(alert_row["watch_id"]),),
+            ).fetchall()
+        ]
+        deliveries = [
+            {key: row[key] for key in row.keys()}  # noqa: SIM118 - sqlite3.Row
+            for row in conn.execute(
+                "SELECT id, alert_id, channel_id, status, http_status, error,"
+                " attempts, created_at FROM deliveries WHERE alert_id = ?"
+                " ORDER BY created_at, rowid;",
+                (report_id,),
+            ).fetchall()
+        ]
+        predictions = [
+            {key: row[key] for key in row.keys()}  # noqa: SIM118 - sqlite3.Row
+            for row in conn.execute(
+                "SELECT * FROM predictions WHERE watch_id = ?"
+                " ORDER BY created_at, rowid;",
+                (str(alert_row["watch_id"]),),
+            ).fetchall()
+        ]
+    finally:
+        conn.close()
+
+    watch = (
+        {key: watch_row[key] for key in watch_row.keys()}  # noqa: SIM118 - sqlite3.Row
+        if watch_row is not None
+        else None
+    )
+    template = str((watch or {}).get("template", "")) if watch else ""
+    recipe = recipe_for(template)
+    if watch is not None and "region_json" in watch:
+        try:
+            watch["region"] = json.loads(watch.pop("region_json") or "{}")
+        except (TypeError, ValueError):
+            watch["region"] = {}
+    return {
+        "report_id": report_id,
+        "route": {
+            "template": template or None,
+            "recipe_id": template if recipe else None,
+            "recipe_title": str(recipe["title"]) if recipe else None,
+            "recipe_blurb": str(recipe["blurb"]) if recipe else None,
+            "question": (watch or {}).get("question") if watch else None,
+        },
+        "watch": watch,
+        "alert": {
+            "id": alert_row["id"],
+            "title": alert_row["title"],
+            "confidence": float(alert_row["confidence"]),
+            "status": alert_row["status"],
+            "evidence": json.loads(alert_row["evidence_json"] or "{}"),
+            "created_at": alert_row["created_at"],
+            "decided_at": alert_row["decided_at"],
+        },
+        "steps": receipts,
+        "deliveries": deliveries,
+        "predictions": predictions,
+    }

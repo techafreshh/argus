@@ -26,7 +26,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from starlette.responses import StreamingResponse
 
-from argus.adapters import mem0_client
+from argus.adapters import geocode, mem0_client
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.router import abstain_receipt, route
 from argus.store.db import get_connection, init_db
@@ -162,6 +162,21 @@ def _effective_region(payload: AguiIn) -> dict:
     return region
 
 
+def _ensure_region(question: str, region: dict) -> tuple[dict, dict | None]:
+    """Freeform support: no explicit region -> resolve a place from the text.
+
+    Returns the (possibly unchanged) region plus the geocode info when a
+    place resolved, so the caller can write the auditable receipt.
+    """
+    if region or not question.strip():
+        return region, None
+    try:
+        resolved, geo = geocode.region_from_question(question)
+    except Exception:  # noqa: BLE001 - resolution must never break a run
+        return region, None
+    return (resolved or region), geo
+
+
 def _insert_watch(question: str, template: str, region: dict, cadence: str) -> str:
     name = question.strip()[:200] or "untitled question"
     watch_id = uuid.uuid4().hex
@@ -190,7 +205,9 @@ def _insert_watch(question: str, template: str, region: dict, cadence: str) -> s
     return watch_id
 
 
-def _insert_receipt(watch_id: str, tool: str, params: dict, payload: dict) -> dict:
+def _insert_receipt(
+    watch_id: str, tool: str, params: dict, payload: dict, source_url: str = ""
+) -> dict:
     receipt = {
         "id": uuid.uuid4().hex,
         "watch_id": watch_id,
@@ -198,7 +215,7 @@ def _insert_receipt(watch_id: str, tool: str, params: dict, payload: dict) -> di
         "tool": tool,
         "params": params,
         "params_json": json.dumps(params, sort_keys=True, default=str),
-        "source_url": "",
+        "source_url": source_url,
         "data_hash": hashlib.sha256(
             json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
         ).hexdigest(),
@@ -245,6 +262,22 @@ def _recall(question: str, watch_id: str) -> list[dict]:
         return []
 
 
+def _record_geocode(watch_id: str, geo: dict | None) -> None:
+    """Auditable receipt when freeform text resolved a place -> bbox."""
+    if not geo:
+        return
+    try:
+        _insert_receipt(
+            watch_id,
+            "geocode",
+            {"place": geo.get("name", ""), "bbox": geo.get("bbox", [])},
+            {"place": geo.get("name", ""), "bbox": geo.get("bbox", [])},
+            source_url=str(geo.get("source_url", "")),
+        )
+    except Exception:  # noqa: BLE001, S110 - receipt must never break a run
+        pass
+
+
 def _store_run_memory(
     question: str, answer: str, template: str | None, watch_id: str, thread_id: str
 ) -> None:
@@ -280,6 +313,8 @@ def _run_frames(
                 "agent": "argus",
             }
         )
+        # Freeform: no explicit region -> resolve a place from the question.
+        region, geo = _ensure_region(question, region)
         if not question.strip():
             info = abstain_receipt("")
             watch_id = _insert_watch(question, "unrouted", region, cadence)
@@ -329,6 +364,7 @@ def _run_frames(
         if template is None:
             info = abstain_receipt(question)
             watch_id = _insert_watch(question, "unrouted", region, cadence)
+            _record_geocode(watch_id, geo)
             receipt = _insert_receipt(
                 watch_id,
                 "ask_abstain",
@@ -384,11 +420,21 @@ def _run_frames(
             }
         )
         watch_id = _insert_watch(question, str(template), region, cadence)
+        _record_geocode(watch_id, geo)
         receipt = _insert_receipt(
             watch_id,
             "ask_route",
-            {"question": question, "template": str(template)},
-            {"template": str(template), "plan": plan_dict},
+            {
+                "question": question,
+                "template": str(template),
+                "recipe_id": result.get("recipe_id"),
+            },
+            {
+                "template": str(template),
+                "recipe_id": result.get("recipe_id"),
+                "recipe_title": result.get("recipe_title"),
+                "plan": plan_dict,
+            },
         )
         memories = _recall(question, watch_id)
         yield _frame(
@@ -411,6 +457,8 @@ def _run_frames(
                 "role": "assistant",
                 "content": f"Template {template}: plan ready.",
                 "template": str(template),
+                "recipe_id": result.get("recipe_id"),
+                "recipe_title": result.get("recipe_title"),
                 "plan": plan_dict,
                 "watch_id": watch_id,
                 "receipt_id": receipt["id"],
@@ -436,6 +484,7 @@ def _run_frames(
                 "type": "run_finished",
                 "ok": True,
                 "template": str(template),
+                "recipe_id": result.get("recipe_id"),
                 "watch_id": watch_id,
                 "receipt_id": receipt["id"],
             }

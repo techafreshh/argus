@@ -11,6 +11,7 @@ type TranscriptRow =
       kind: "answer";
       content: string;
       template: string | null;
+      recipeTitle: string | null;
       watchId: string;
       receiptId: string;
       citations: { receipt_id: string; data_hash: string; source_url: string }[];
@@ -33,8 +34,7 @@ function planTodos(plan: Record<string, unknown>): TodoItem[] {
 }
 
 function ChatInner() {
-  const [question, setQuestion] = useState("Is flooding worsening here?");
-  const [bboxText, setBboxText] = useState("3,6,4,7");
+  const [draft, setDraft] = useState("");
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [rows, setRows] = useState<TranscriptRow[]>([]);
   const [status, setStatus] = useState("");
@@ -44,23 +44,27 @@ function ChatInner() {
   const [decision, setDecision] = useState("");
   const [memories, setMemories] = useState<AguiMemory[]>([]);
   const threadRef = useRef(crypto.randomUUID());
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const parseBbox = (): [number, number, number, number] | undefined => {
-    const parts = bboxText
-      .split(",")
-      .map((p) => Number(p.trim()))
-      .filter((n) => Number.isFinite(n));
-    if (parts.length !== 4) return undefined;
-    return [parts[0], parts[1], parts[2], parts[3]];
+  // Auto-grow the composer with its content (capped by CSS max-height).
+  const resizeComposer = () => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
   };
 
-  const ask = async () => {
-    if (busy) return;
+  const ask = async (text: string) => {
+    const question = text.trim();
+    if (busy || !question) return;
     setBusy(true);
     setDegraded(false);
     setDecision("");
     setMemories([]);
     setStatus("Planning");
+    setDraft("");
+    requestAnimationFrame(resizeComposer);
     setRows((prev) => [...prev, { kind: "activity", text: `asking: ${question}` }]);
     const onEvent = (event: AguiEvent) => {
       if (event.type === "tool_call") {
@@ -96,6 +100,7 @@ function ChatInner() {
             kind: "answer",
             content: event.content,
             template: (event.template as string | null) ?? null,
+            recipeTitle: (event.recipe_title as string | null) ?? null,
             watchId: String(event.watch_id ?? ""),
             receiptId: String(event.receipt_id ?? ""),
             citations: event.citations ?? [],
@@ -115,11 +120,7 @@ function ChatInner() {
         }
       }
     };
-    const bbox = parseBbox();
-    await streamChat(question, onEvent, {
-      bbox,
-      threadId: threadRef.current,
-    });
+    await streamChat(question, onEvent, { threadId: threadRef.current });
   };
 
   const decide = async (kind: "approve" | "reject") => {
@@ -142,112 +143,117 @@ function ChatInner() {
   };
 
   return (
-    <section aria-label="chat">
-      <h2>Ask the Earth</h2>
-      <div role="search" aria-label="chat-prompt" data-beui="prompt-input" className="form-row">
-        <label className="field" style={{ flex: 2, minWidth: 220 }}>
-          <span className="field-label">Question</span>
-          <input
-            className="input"
-            aria-label="chat question"
-            data-beui="input"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-        </label>
-        <label className="field" style={{ flex: 1, minWidth: 140 }}>
-          <span className="field-label">BBox</span>
-          <input
-            className="input"
-            aria-label="chat bbox"
-            data-beui="input"
-            value={bboxText}
-            onChange={(e) => setBboxText(e.target.value)}
-          />
-        </label>
-        <div className="field">
-          <span className="field-label" aria-hidden="true">
-            &nbsp;
-          </span>
-          <button type="button" className="btn btn--primary" onClick={() => void ask()} disabled={busy}>
-            {busy ? "Streaming" : "Ask"}
-          </button>
-        </div>
-      </div>
-      {status && <p data-testid="chat-status" className="note">{status}</p>}
-      {memories.length > 0 && (
-        <div aria-label="memory-chips" data-testid="memory-chips" className="memory-row">
-          <span className="memory-label">Remembered</span>
-          {memories.map((m) => (
-            <span key={m.id || m.memory} data-testid="memory-chip" className="beui-chip memory-chip">
-              {m.memory}
-            </span>
-          ))}
-        </div>
-      )}
-      {todos.length > 0 && (
-        <ol aria-label="todo-list" className="plan-list">
-          {todos.map((t) => (
-            <li key={t.label} className={t.done ? "is-done" : undefined}>
-              <span className="plan-check" aria-hidden="true" />
-              <span className="plan-key">{t.label}</span>
-              <span>{t.detail}</span>
+    <section aria-label="chat" className="chat-shell" data-beui="chat-panel">
+      <div className="chat-scroll" ref={scrollRef}>
+        {status && <p data-testid="chat-status" className="note">{status}</p>}
+        {memories.length > 0 && (
+          <div aria-label="memory-chips" data-testid="memory-chips" className="memory-row">
+            <span className="memory-label">Remembered</span>
+            {memories.map((m) => (
+              <span key={m.id || m.memory} data-testid="memory-chip" className="beui-chip memory-chip">
+                {m.memory}
+              </span>
+            ))}
+          </div>
+        )}
+        {todos.length > 0 && (
+          <ol aria-label="todo-list" className="plan-list">
+            {todos.map((t) => (
+              <li key={t.label} className={t.done ? "is-done" : undefined}>
+                <span className="plan-check" aria-hidden="true" />
+                <span className="plan-key">{t.label}</span>
+                <span>{t.detail}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+        <ul aria-label="agent-activity" className="activity-list">
+          {rows.map((row, i) => (
+            <li key={i} style={{ listStyle: "none" }}>
+              {row.kind === "activity" && <span className="note">{row.text}</span>}
+              {row.kind === "tool" && (
+                <span data-testid="tool-result" className="receipt-line">
+                  <b>{row.tool}</b> receipt {row.receiptId} hash {row.hash}
+                </span>
+              )}
+              {row.kind === "answer" && (
+                <div className="msg" data-beui="message-bubble">
+                  <p>{row.content}</p>
+                  {row.template && (
+                    <p className="note">
+                      Followed recipe <b>{row.recipeTitle ?? row.template}</b>
+                    </p>
+                  )}
+                  {row.citations.length > 0 && (
+                    <ul aria-label="citations" className="citations">
+                      {row.citations.map((c) => (
+                        <li key={c.receipt_id} className="receipt-line">
+                          <b>receipt</b> {c.receipt_id} hash {c.data_hash}
+                          {c.source_url ? ` source ${c.source_url}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {row.template && (
+                    <div aria-label="approval-card" className="alert-actions">
+                      <button
+                        type="button"
+                        className="btn btn--primary"
+                        disabled={!lastWatch}
+                        onClick={() => void decide("approve")}
+                      >
+                        Approve alert
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn--danger"
+                        disabled={!lastWatch}
+                        onClick={() => void decide("reject")}
+                      >
+                        Reject alert
+                      </button>
+                      {decision && <span data-testid="chat-decision" className="note"> {decision}</span>}
+                    </div>
+                  )}
+                </div>
+              )}
+              {row.kind === "error" && (
+                <span className="note note--error">{row.text}</span>
+              )}
             </li>
           ))}
-        </ol>
-      )}
-      <ul aria-label="agent-activity" className="activity-list">
-        {rows.map((row, i) => (
-          <li key={i} style={{ listStyle: "none" }}>
-            {row.kind === "activity" && <span className="note">{row.text}</span>}
-            {row.kind === "tool" && (
-              <span data-testid="tool-result" className="receipt-line">
-                <b>{row.tool}</b> receipt {row.receiptId} hash {row.hash}
-              </span>
-            )}
-            {row.kind === "answer" && (
-              <div className="msg" data-beui="message-bubble">
-                <p>{row.content}</p>
-                {row.template && <p className="note">Routed to {row.template}</p>}
-                {row.citations.length > 0 && (
-                  <ul aria-label="citations" className="citations">
-                    {row.citations.map((c) => (
-                      <li key={c.receipt_id} className="receipt-line">
-                        <b>receipt</b> {c.receipt_id} hash {c.data_hash}
-                        {c.source_url ? ` source ${c.source_url}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {row.template && (
-                  <div aria-label="approval-card" className="alert-actions">
-                    <button
-                      type="button"
-                      className="btn btn--primary"
-                      disabled={!lastWatch}
-                      onClick={() => void decide("approve")}
-                    >
-                      Approve alert
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn--danger"
-                      disabled={!lastWatch}
-                      onClick={() => void decide("reject")}
-                    >
-                      Reject alert
-                    </button>
-                    {decision && <span data-testid="chat-decision" className="note"> {decision}</span>}
-                  </div>
-                )}
-              </div>
-            )}
-            {row.kind === "error" && (
-              <span className="note note--error">{row.text}</span>
-            )}
-          </li>
-        ))}
-      </ul>
+        </ul>
+      </div>
+      <div role="search" aria-label="chat-prompt" data-beui="prompt-input" className="composer">
+        <textarea
+          ref={composerRef}
+          className="input composer-input"
+          aria-label="chat question"
+          data-beui="input"
+          rows={1}
+          placeholder="Ask the Earth anything — e.g. is the Niger delta flooding?"
+          value={draft}
+          disabled={busy}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            resizeComposer();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              void ask(draft);
+            }
+          }}
+        />
+        <button
+          type="button"
+          className="btn btn--primary composer-send"
+          onClick={() => void ask(draft)}
+          disabled={busy || !draft.trim()}
+        >
+          {busy ? "Streaming" : "Ask"}
+        </button>
+      </div>
       {degraded && (
         <p data-testid="chat-degraded" className="note note--warn">
           Chat is unavailable; the globe, watchlist, and alert panels keep working.

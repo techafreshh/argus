@@ -12,6 +12,7 @@ from fastapi import APIRouter, HTTPException
 from argus.adapters import mem0_client
 from argus.reports.ledger import log_prediction
 from argus.reports.render import file_report
+from argus.server.deliver_alert import dispatch_alert
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -115,7 +116,7 @@ def _receipts_for_watch(watch_id: str) -> list[dict]:
     return out
 
 
-def _file_report_for_alert(alert: dict) -> None:
+def _file_report_for_alert(alert: dict) -> dict:
     """Render the graded card, upsert the reports row, and log a prediction."""
     receipts = _receipts_for_watch(str(alert["watch_id"]))
     card = file_report(alert, receipts)
@@ -161,6 +162,7 @@ def _file_report_for_alert(alert: dict) -> None:
         )
     except Exception:  # noqa: BLE001, S110 - ledger must never break approve
         pass
+    return card
 
 
 @router.post("/api/alerts/{alert_id}/approve")
@@ -186,7 +188,12 @@ def approve_alert(alert_id: str) -> dict:
     alert["report_id"] = alert_id
     alert["decided_at"] = now
     alert["alert_id"] = alert["id"]
-    _file_report_for_alert(alert)
+    card = _file_report_for_alert(alert)
+    # Push notifications: every active channel gets the signed report envelope.
+    try:
+        dispatch_alert(alert, card)
+    except Exception:  # noqa: BLE001, S110 - delivery must never break approve
+        pass
     # Long memory: future chats recall what the operator approved.
     mem0_client.remember(
         [

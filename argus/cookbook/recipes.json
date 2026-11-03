@@ -1,0 +1,371 @@
+{
+  "recipes": [
+    {
+      "id": "ship_presence",
+      "title": "Ship presence",
+      "blurb": "Find vessels and port activity in coastal waters.",
+      "sensor": "s1",
+      "keywords": [
+        "vessel",
+        "boat",
+        "tanker",
+        "harbor",
+        "harbour",
+        "seaport",
+        "ferry",
+        "port traffic",
+        "port activity",
+        "container ship"
+      ],
+      "words": [
+        "ship",
+        "ships",
+        "shipping"
+      ],
+      "region_preset": {
+        "label": "Rotterdam port approaches",
+        "bbox": [
+          3.9,
+          51.9,
+          4.6,
+          52.1
+        ]
+      },
+      "cadence": "daily",
+      "question": "Is port traffic or vessel presence changing?",
+      "analysis": [
+        "Segment bright/dark vessel targets in SAR imagery over the AOI.",
+        "Count targets per pass and compare against the trailing baseline."
+      ],
+      "verification": [
+        "Cross-check the count against a second independent SAR pass.",
+        "Discard passes whose coverage fraction is below the minimum."
+      ],
+      "alert_threshold": "Vessel-count z-score above 2.5 versus the trailing window.",
+      "pitfalls": [
+        "Stationary anchored vessels blend into the baseline.",
+        "Coastal clutter inflates counts; land masking runs first."
+      ],
+      "sources": [
+        "sentinel-1",
+        "overpass"
+      ],
+      "region_aliases": [
+        "gulf of guinea",
+        "rotterdam",
+        "rotterdam port"
+      ]
+    },
+    {
+      "id": "fire_anomaly",
+      "title": "Fire anomaly",
+      "blurb": "Spot burn scars and active thermal anomalies.",
+      "sensor": "s2",
+      "keywords": [
+        "wildfire",
+        "wild fire",
+        "burn scar",
+        "burned area",
+        "active fire",
+        "fire anomaly",
+        "thermal anomaly"
+      ],
+      "words": [
+        "fire",
+        "fires",
+        "burning"
+      ],
+      "region_preset": {
+        "label": "Amazon arc of deforestation",
+        "bbox": [
+          -63.0,
+          -10.0,
+          -50.0,
+          -5.0
+        ]
+      },
+      "cadence": "daily",
+      "question": "Are there new burn scars or active fires?",
+      "analysis": [
+        "Threshold thermal bands for active anomalies.",
+        "Difference recent vs baseline burned-area maps for new scars."
+      ],
+      "verification": [
+        "Confirm new scars with FIRMS hotspots inside the same window.",
+        "Reject single-pixel detections below the confidence floor."
+      ],
+      "alert_threshold": "New burned hectares above 50 ha or hotspot density above 3 per 100 km2.",
+      "pitfalls": [
+        "Cloud cover hides optical burn scars; SAR backscatter change helps.",
+        "Solar farms and flares read as thermal anomalies without masking."
+      ],
+      "sources": [
+        "sentinel-2",
+        "firms"
+      ],
+      "region_aliases": [
+        "amazon",
+        "amazon rainforest",
+        "arc of deforestation",
+        "amazon basin"
+      ]
+    },
+    {
+      "id": "flooding",
+      "title": "Flooding",
+      "blurb": "Detect surface-water expansion after heavy rain.",
+      "sensor": "s1",
+      "keywords": [
+        "flood",
+        "inundat",
+        "waterlog",
+        "deluge",
+        "river overflow",
+        "flash flood"
+      ],
+      "words": [],
+      "region_preset": {
+        "label": "Niger delta floodplain",
+        "bbox": [
+          5.5,
+          4.5,
+          8.5,
+          6.5
+        ]
+      },
+      "cadence": "daily",
+      "question": "Is flooding expanding beyond the normal water extent?",
+      "analysis": [
+        "Classify open water with NDWI from optical or SAR water masks.",
+        "Difference current vs baseline water extent for new inundation."
+      ],
+      "verification": [
+        "Cross-check expansion against rainfall accumulations upstream.",
+        "Reject shadow/terrain artifacts below the slope threshold."
+      ],
+      "alert_threshold": "New surface water above 100 ha sustained across two passes.",
+      "pitfalls": [
+        "Rice paddies and seasonal wetlands mimic flood expansion.",
+        "Rough SAR seas can false-positive coastal inundation."
+      ],
+      "sources": [
+        "sentinel-1",
+        "openmeteo"
+      ],
+      "region_aliases": [
+        "niger delta",
+        "niger river delta",
+        "niger delta floodplain"
+      ]
+    },
+    {
+      "id": "drought",
+      "title": "Drought",
+      "blurb": "Watch rainfall deficits and soil drying.",
+      "sensor": "chirps",
+      "keywords": [
+        "drought",
+        "desertif",
+        "dry spell",
+        "rainfall deficit",
+        "precipitation deficit",
+        "soil moisture"
+      ],
+      "words": [
+        "arid"
+      ],
+      "region_preset": {
+        "label": "Central Sahel",
+        "bbox": [
+          -4.0,
+          12.0,
+          4.0,
+          16.0
+        ]
+      },
+      "cadence": "weekly",
+      "question": "Is there a drought signal in the rainfall deficit?",
+      "analysis": [
+        "Accumulate CHIRPS rainfall over rolling 30/90-day windows.",
+        "Compute the deficit percentile against the seasonal climatology."
+      ],
+      "verification": [
+        "Cross-check the deficit against ERA5 reanalysis accumulation.",
+        "Require the deficit to persist across consecutive windows."
+      ],
+      "alert_threshold": "90-day accumulation below the 15th climatological percentile.",
+      "pitfalls": [
+        "Single-month dips recover; persistence is the signal.",
+        "Gauge-sparse regions lean entirely on satellite estimates."
+      ],
+      "sources": [
+        "chirps",
+        "era5"
+      ],
+      "region_aliases": [
+        "sahel",
+        "central sahel"
+      ]
+    },
+    {
+      "id": "reservoir_change",
+      "title": "Reservoir change",
+      "blurb": "Measure reservoir and lake surface change.",
+      "sensor": "s1",
+      "keywords": [
+        "reservoir",
+        "dam level",
+        "lake level",
+        "water storage",
+        "impoundment",
+        "dam storage"
+      ],
+      "words": [
+        "dam"
+      ],
+      "region_preset": {
+        "label": "Lake Mead",
+        "bbox": [
+          -114.6,
+          35.9,
+          -113.9,
+          36.6
+        ]
+      },
+      "cadence": "weekly",
+      "question": "Is the reservoir surface shrinking or growing?",
+      "analysis": [
+        "Segment the water surface inside the reservoir polygon.",
+        "Track area change against the trailing seasonal baseline."
+      ],
+      "verification": [
+        "Cross-check area change with radar altimetry where available.",
+        "Reject observations with ice or heavy cloud contamination."
+      ],
+      "alert_threshold": "Surface area more than 2 sigma below the seasonal norm.",
+      "pitfalls": [
+        "Managed releases move the surface without any anomaly upstream.",
+        "Emergent vegetation shifts the optical water edge."
+      ],
+      "sources": [
+        "sentinel-1",
+        "sentinel-2"
+      ],
+      "region_aliases": [
+        "lake mead",
+        "mead",
+        "lake mead reservoir"
+      ]
+    },
+    {
+      "id": "dust_risk",
+      "title": "Dust risk",
+      "blurb": "Flag dust plumes and hazy air intrusions.",
+      "sensor": "openmeteo",
+      "keywords": [
+        "dust storm",
+        "sandstorm",
+        "haboob",
+        "dust plume",
+        "aerosol optical",
+        "dust risk"
+      ],
+      "words": [
+        "dust",
+        "dusty",
+        "sandstorm",
+        "pm10"
+      ],
+      "region_preset": {
+        "label": "Bodélé Depression",
+        "bbox": [
+          12.0,
+          13.0,
+          20.0,
+          18.0
+        ]
+      },
+      "cadence": "daily",
+      "question": "Are dust conditions rising toward transport levels?",
+      "analysis": [
+        "Pull dust PM10 and aerosol optical depth from the forecast feed.",
+        "Flag hours above the regional transport threshold."
+      ],
+      "verification": [
+        "Cross-check the flagged hours against Sentinel-5P aerosol index.",
+        "Require wind direction consistency with the source basin."
+      ],
+      "alert_threshold": "PM10 above 200 ug/m3 or AOD above 1.0 for 6+ hours.",
+      "pitfalls": [
+        "Smoke and dust share the aerosol index; source geography disambiguates.",
+        "Forecast feeds drift; verification anchors to observations."
+      ],
+      "sources": [
+        "openmeteo",
+        "sentinel-5p"
+      ],
+      "region_aliases": [
+        "bodele depression",
+        "bodele",
+        "bodele basin"
+      ]
+    },
+    {
+      "id": "vegetation_decline",
+      "title": "Vegetation decline",
+      "blurb": "Track greenness loss across seasons.",
+      "sensor": "s2",
+      "keywords": [
+        "vegetat",
+        "ndvi",
+        "deforest",
+        "forest loss",
+        "forest cover",
+        "crop health",
+        "crop loss",
+        "crop failure",
+        "yield loss",
+        "yield decline",
+        "chlorophyll",
+        "leaf area",
+        "greenness",
+        "dieback",
+        "defoliat"
+      ],
+      "words": [],
+      "region_preset": {
+        "label": "Iowa corn belt",
+        "bbox": [
+          -95.0,
+          41.0,
+          -93.0,
+          43.0
+        ]
+      },
+      "cadence": "weekly",
+      "question": "Is vegetation greenness declining against the season?",
+      "analysis": [
+        "Compute NDVI composites for current vs baseline windows.",
+        "Difference the composites and cluster sustained decline patches."
+      ],
+      "verification": [
+        "Cross-check decline patches against rainfall and thermal stress.",
+        "Reject patches smaller than the minimum mapping unit."
+      ],
+      "alert_threshold": "NDVI drop below 0.15 vs baseline over 500+ ha.",
+      "pitfalls": [
+        "Harvest looks identical to decline on naive differencing.",
+        "Cloud gaps bias composites; require a minimum clear fraction."
+      ],
+      "sources": [
+        "sentinel-2",
+        "chirps"
+      ],
+      "region_aliases": [
+        "iowa",
+        "iowa corn belt",
+        "corn belt"
+      ]
+    }
+  ]
+}

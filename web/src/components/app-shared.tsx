@@ -7,6 +7,7 @@ import {
 	HistoryIcon,
 	ListPlusIcon,
 	ReceiptTextIcon,
+	WrenchIcon,
 } from "lucide-react";
 
 export type SidebarNavItem = {
@@ -36,6 +37,7 @@ export const navGroups: SidebarNavGroup[] = [
 			{ title: "Reports", path: "/reports", icon: <FileTextIcon /> },
 			{ title: "Analogs", path: "/analogs", icon: <HistoryIcon /> },
 			{ title: "Receipts", path: "/receipts", icon: <ReceiptTextIcon /> },
+			{ title: "Toolbox", path: "/toolbox", icon: <WrenchIcon /> },
 		],
 	},
 	{

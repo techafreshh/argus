@@ -35,6 +35,8 @@ export type AguiEvent =
       role: string;
       content: string;
       template?: string | null;
+      recipe_id?: string | null;
+      recipe_title?: string | null;
       plan?: Record<string, unknown>;
       watch_id?: string;
       receipt_id?: string;

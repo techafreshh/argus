@@ -1,12 +1,89 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "../beui";
 import { PageHeader } from "../shell/page-header";
-import { createWatch, listWatches, previewTemplate, type AskPreview, type Watch } from "../api";
+import {
+	createWatch,
+	getPresets,
+	listWatches,
+	previewTemplate,
+	type AskPreview,
+	type Preset,
+	type Watch,
+} from "../api";
 
 const BLANK = { minLon: "24", minLat: "-12.5", maxLon: "30", maxLat: "-8" };
 
 function errText(err: unknown): string {
 	return err instanceof Error ? err.message : String(err);
+}
+
+/** One-click cookbook watches, shared with the onboarding wizard. */
+export function PresetStrip({ onChanged }: { onChanged?: () => void }) {
+	const [presets, setPresets] = useState<Preset[]>([]);
+	const [starting, setStarting] = useState<string | null>(null);
+	const [note, setNote] = useState("");
+	const [failed, setFailed] = useState(false);
+
+	useEffect(() => {
+		let alive = true;
+		getPresets()
+			.then((rows) => {
+				if (alive) setPresets(rows);
+			})
+			.catch(() => {
+				/* the strip is additive; the manager below always works */
+			});
+		return () => {
+			alive = false;
+		};
+	}, []);
+
+	const start = async (preset: Preset) => {
+		setStarting(preset.id);
+		setFailed(false);
+		setNote("");
+		try {
+			await createWatch({
+				name: `${preset.title} · ${preset.region_label}`,
+				region: { type: "bbox", coords: preset.bbox },
+				question: preset.question || `Is ${preset.title.toLowerCase()} occurring?`,
+				cadence: preset.cadence,
+			});
+			setNote(`Watch started — ${preset.title} over ${preset.region_label}.`);
+			onChanged?.();
+		} catch (err) {
+			setFailed(true);
+			setNote(`Could not start the watch — ${errText(err)}`);
+		} finally {
+			setStarting(null);
+		}
+	};
+
+	if (presets.length === 0) return null;
+
+	return (
+		<section aria-label="preset-gallery" data-testid="preset-gallery" className="preset-section">
+			<h2>Start from a cookbook preset</h2>
+			<ul className="preset-grid">
+				{presets.map((preset) => (
+					<li key={preset.id} className="preset-card" data-testid={`preset-${preset.id}`}>
+						<span className="preset-title">{preset.title}</span>
+						<span className="preset-region">{preset.region_label}</span>
+						<span className="preset-blurb">{preset.blurb}</span>
+						<button
+							type="button"
+							className="btn btn--primary preset-start"
+							disabled={starting !== null}
+							onClick={() => void start(preset)}
+						>
+							{starting === preset.id ? "Starting…" : "Start watch"}
+						</button>
+					</li>
+				))}
+			</ul>
+			{note && <p className={failed ? "note note--error" : "note"}>{note}</p>}
+		</section>
+	);
 }
 
 function WatchlistManager({ onChanged }: { onChanged: () => void }) {
@@ -187,6 +264,7 @@ export default function WatchlistPage() {
 				title="Watchlist"
 				blurb="Add a region and a plain-English question — ARGUS schedules the rest."
 			/>
+			<PresetStrip onChanged={() => void refresh()} />
 			<Card label="watchlist">
 				<WatchlistManager onChanged={() => void refresh()} />
 			</Card>

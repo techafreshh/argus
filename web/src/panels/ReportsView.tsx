@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getReport, type ReportCard } from "../api";
+import { getReport, getReportTrace, type ReportCard, type ReportTrace } from "../api";
 
 /** One-shot count-up that ends on the exact target value. */
 function CountUp({ value, format }: { value: number; format?: (v: number) => string }) {
@@ -25,11 +25,97 @@ function CountUp({ value, format }: { value: number; format?: (v: number) => str
   return <span aria-label="number">{format ? format(current) : String(current)}</span>;
 }
 
+/** The decision log: recipe followed, every tool call, pushes, ledger. */
+function DecisionLog({ reportId }: { reportId: string }) {
+  const [trace, setTrace] = useState<ReportTrace | null>(null);
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    setTrace(null);
+    setNote("");
+    getReportTrace(reportId)
+      .then((t) => {
+        if (alive) setTrace(t);
+      })
+      .catch((err) => {
+        if (alive) setNote(`Decision log unavailable — ${err instanceof Error ? err.message : String(err)}`);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [reportId]);
+
+  if (note) return <p className="note">{note}</p>;
+  if (!trace) return <p className="note">Loading decision log…</p>;
+
+  return (
+    <section aria-label="decision-log" data-testid="decision-log" className="decision-log">
+      <h4 className="missing-section">Decision log</h4>
+      {trace.route.recipe_id && (
+        <p className="receipt-line">
+          <b>recipe</b> {trace.route.recipe_title ?? trace.route.recipe_id} —{" "}
+          {trace.route.recipe_blurb}
+        </p>
+      )}
+      {trace.route.question && (
+        <p className="receipt-line">
+          <b>question</b> {trace.route.question}
+        </p>
+      )}
+      <ol aria-label="decision-steps" className="decision-steps">
+        {trace.steps.map((step) => (
+          <li key={step.id} className="decision-step">
+            <span className="decision-tool">{step.tool}</span>
+            <span className="decision-meta">
+              {step.source_url ? (
+                <a href={step.source_url} target="_blank" rel="noreferrer">
+                  {new URL(step.source_url, window.location.origin).host}
+                </a>
+              ) : (
+                "internal"
+              )}{" "}
+              · hash {step.data_hash.slice(0, 12)} · {step.created_at.slice(0, 19)}
+            </span>
+          </li>
+        ))}
+      </ol>
+      {trace.deliveries.length > 0 && (
+        <div className="decision-deliveries">
+          <b>webhook pushes</b>
+          <ul aria-label="deliveries">
+            {trace.deliveries.map((d) => (
+              <li key={d.id} className="receipt-line">
+                channel {d.channel_id.slice(0, 8)} — {d.status}
+                {d.http_status ? ` (HTTP ${d.http_status})` : ""}
+                {d.error ? ` · ${d.error}` : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** Graded report card: headline, count-up figures, citations, before/after imagery. */
 export default function ReportsView() {
   const [reportId, setReportId] = useState("");
   const [card, setCard] = useState<ReportCard | null>(null);
   const [note, setNote] = useState("");
+
+  // Webhook payloads deep-link here as /reports?report=<id>.
+  useEffect(() => {
+    const linked = new URLSearchParams(window.location.search).get("report");
+    if (!linked) return;
+    setReportId(linked);
+    setNote("");
+    getReport(linked)
+      .then(setCard)
+      .catch((err) =>
+        setNote(`Report unavailable — ${err instanceof Error ? err.message : String(err)}`),
+      );
+  }, []);
 
   const load = async () => {
     setNote("");
@@ -118,6 +204,7 @@ export default function ReportsView() {
               </li>
             ))}
           </ul>
+          <DecisionLog reportId={card.id} />
         </article>
       )}
     </section>

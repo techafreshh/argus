@@ -250,3 +250,136 @@ export async function getEnsoStatus(): Promise<EnsoStatus> {
     subwatchers: Array.isArray(subs) ? subs : [],
   } as EnsoStatus;
 }
+
+/* --- Cookbook presets, notification channels, toolbox, decision log --- */
+
+export interface Preset {
+  id: string;
+  title: string;
+  blurb: string;
+  sensor: string;
+  question: string;
+  cadence: string;
+  region_label: string;
+  bbox: [number, number, number, number];
+}
+
+export interface Channel {
+  id: string;
+  kind: string;
+  target: string;
+  watch_id: string | null;
+  status: string;
+  created_at: string;
+}
+
+export interface Delivery {
+  id: string;
+  alert_id: string | null;
+  channel_id: string;
+  status: string;
+  http_status: number | null;
+  error: string;
+  attempts: number;
+  created_at: string;
+}
+
+export interface TraceStep {
+  id: string;
+  tool: string;
+  params: Record<string, unknown>;
+  source_url: string;
+  data_hash: string;
+  created_at: string;
+}
+
+export interface ReportTrace {
+  report_id: string;
+  route: {
+    template: string | null;
+    recipe_id: string | null;
+    recipe_title: string | null;
+    recipe_blurb: string | null;
+    question: string | null;
+  };
+  watch: {
+    id: string;
+    name: string;
+    region: unknown;
+    question: string;
+    template: string;
+    cadence: string;
+    status: string;
+  } | null;
+  alert: {
+    id: string;
+    title: string;
+    confidence: number;
+    status: string;
+    evidence: Record<string, unknown>;
+    created_at: string;
+    decided_at: string | null;
+  };
+  steps: TraceStep[];
+  deliveries: Delivery[];
+  predictions: Record<string, unknown>[];
+}
+
+export interface ToolboxSource {
+  id: string;
+  name: string;
+  kind: string;
+  url: string;
+  coverage: string;
+  cadence: string;
+  auth: string;
+  used_by: string[];
+  status: string;
+}
+
+export async function getPresets(): Promise<Preset[]> {
+  const res = await fetch("/api/presets");
+  const body = await checked<{ presets: Preset[] }>(res);
+  return body.presets;
+}
+
+export async function listChannels(): Promise<Channel[]> {
+  const res = await fetch("/api/channels");
+  return checked<Channel[]>(res);
+}
+
+export async function createChannel(input: {
+  target: string;
+  secret?: string;
+  watch_id?: string;
+}): Promise<Channel> {
+  const res = await fetch("/api/channels", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  return checked<Channel>(res);
+}
+
+export async function deleteChannel(id: string): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/channels/${id}`, { method: "DELETE" });
+  return checked<{ ok: boolean }>(res);
+}
+
+export async function testChannel(
+  id: string,
+): Promise<{ ok: boolean; http_status: number | null; error: string }> {
+  const res = await fetch(`/api/channels/${id}/test`, { method: "POST" });
+  return checked(res);
+}
+
+export async function getReportTrace(reportId: string): Promise<ReportTrace> {
+  const res = await fetch(`/api/reports/${reportId}/trace`);
+  return checked<ReportTrace>(res);
+}
+
+export async function getToolbox(): Promise<ToolboxSource[]> {
+  const res = await fetch("/api/toolbox");
+  const body = await checked<{ sources: ToolboxSource[] }>(res);
+  return body.sources;
+}

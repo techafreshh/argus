@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 _MIGRATIONS_DIR = Path(__file__).with_name("migrations")
 

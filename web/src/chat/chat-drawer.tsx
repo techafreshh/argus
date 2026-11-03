@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Loader } from "@/components/motion/loader";
+import { MessageCircleIcon } from "lucide-react";
 
 const ChatPanel = lazy(() => import("./ChatPanel"));
 
@@ -20,7 +21,8 @@ export function useChatDrawer(): ChatDrawerState {
 	return useContext(ChatDrawerContext);
 }
 
-/** Global "Ask the Earth" dock: the AG-UI conversation slides over any page. */
+/** Global "Ask the Earth" dock: the AG-UI conversation slides over any page.
+ * A floating launcher sits bottom-right on every route. */
 export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 	const [open, setOpen] = useState(false);
 	const value = useMemo<ChatDrawerState>(() => ({ openChat: () => setOpen(true) }), []);
@@ -28,10 +30,22 @@ export function ChatDrawerProvider({ children }: { children: ReactNode }) {
 	return (
 		<ChatDrawerContext.Provider value={value}>
 			{children}
+			{!open && (
+				<button
+					type="button"
+					aria-label="open chat drawer"
+					data-testid="chat-fab"
+					className="chat-fab"
+					onClick={() => setOpen(true)}
+				>
+					<MessageCircleIcon className="chat-fab-icon" aria-hidden="true" />
+					<span className="chat-fab-label">Ask the Earth</span>
+				</button>
+			)}
 			<Sheet open={open} onOpenChange={setOpen}>
 				<SheetContent
 					side="right"
-					className="flex w-full flex-col gap-0 overflow-y-auto p-4 sm:max-w-[520px]"
+					className="flex w-full flex-col gap-0 overflow-hidden p-4 sm:max-w-[520px]"
 				>
 					<SheetHeader className="pb-2">
 						<SheetTitle>Ask the Earth</SheetTitle>

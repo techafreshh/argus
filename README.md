@@ -10,6 +10,16 @@ human approval; every claim carries receipts; every prediction lands in a hit/mi
 Chat carries long memory via [Mem0](https://mem0.ai) — conversations, watch definitions,
 and approval decisions survive across sessions (graceful no-op without a key or offline).
 
+Freeform by design: ask in plain language — place names resolve to regions through the
+cookbook gazetteer and the Nominatim geocoder (receipted, offline-safe). Approved alerts
+push a signed envelope (HMAC-SHA256) to any webhook — Slack, Discord, Telegram, n8n —
+via `/api/channels`. Every report carries a **decision log**: the cookbook recipe it
+followed, each tool call with params, hashes and sources, and the delivery attempts.
+The cookbook (`argus/cookbook/recipes.json`) is the auditable source of truth mapping
+natural language to geospatial operations — triggers, sensors, analysis, verification,
+thresholds, pitfalls — and doubles as the one-click preset catalog on the watchlist and
+first-run wizard. The toolbox page probes the curated public-data registry live.
+
 **Meta Global AI Developer Hackathon submission — live through Nov 8.**
 
 ## Built by a factory, running on Meta

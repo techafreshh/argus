@@ -1,0 +1,124 @@
+{
+  "sources": [
+    {
+      "id": "sentinel-1",
+      "name": "Sentinel-1 SAR",
+      "kind": "stac",
+      "url": "https://catalogue.dataspace.copernicus.eu/stac",
+      "coverage": "Global land + coastal waters, C-band SAR",
+      "cadence": "6-12 days per orbit pair",
+      "auth": "none",
+      "used_by": ["ship_presence", "flooding", "reservoir_change"]
+    },
+    {
+      "id": "sentinel-2",
+      "name": "Sentinel-2 MSI",
+      "kind": "stac",
+      "url": "https://catalogue.dataspace.copernicus.eu/stac",
+      "coverage": "Global land, 10-20 m optical",
+      "cadence": "5 days",
+      "auth": "none",
+      "used_by": ["fire_anomaly", "vegetation_decline", "reservoir_change"]
+    },
+    {
+      "id": "firms",
+      "name": "VIIRS + MODIS active fires (NASA FIRMS)",
+      "kind": "api",
+      "url": "https://firms.modaps.eosdis.nasa.gov/api/area/",
+      "coverage": "Global thermal anomalies, ~375 m / 1 km",
+      "cadence": "near-real-time",
+      "auth": "map-key",
+      "used_by": ["fire_anomaly"]
+    },
+    {
+      "id": "chirps",
+      "name": "CHIRPS rainfall",
+      "kind": "api",
+      "url": "https://data.chc.ucsb.edu/products/CHIRPS-2.0/",
+      "coverage": "50S-50N, 0.05 degree precipitation",
+      "cadence": "daily (pentad + monthly)",
+      "auth": "none",
+      "used_by": ["drought", "vegetation_decline"]
+    },
+    {
+      "id": "era5",
+      "name": "ERA5 reanalysis",
+      "kind": "api",
+      "url": "https://cds.climate.copernicus.eu/api",
+      "coverage": "Global, hourly, 1940-present",
+      "cadence": "daily",
+      "auth": "cds-key",
+      "used_by": ["drought"]
+    },
+    {
+      "id": "oisst",
+      "name": "NOAA OISST sea-surface temperature",
+      "kind": "api",
+      "url": "https://www.ncei.noaa.gov/thredds-ocean/catalogs/oisst/catalog.html",
+      "coverage": "Global oceans, 0.25 degree SST",
+      "cadence": "daily",
+      "auth": "none",
+      "used_by": []
+    },
+    {
+      "id": "openmeteo",
+      "name": "Open-Meteo forecast + air quality",
+      "kind": "api",
+      "url": "https://api.open-meteo.com/v1/forecast",
+      "coverage": "Global, hourly dust (PM10) and meteorology",
+      "cadence": "hourly",
+      "auth": "none",
+      "used_by": ["dust_risk", "flooding"]
+    },
+    {
+      "id": "sentinel-5p",
+      "name": "Sentinel-5P TROPOMI",
+      "kind": "stac",
+      "url": "https://catalogue.dataspace.copernicus.eu/stac",
+      "coverage": "Global atmospheric composition (aerosol index, NO2, SO2)",
+      "cadence": "1 day",
+      "auth": "none",
+      "used_by": ["dust_risk"]
+    },
+    {
+      "id": "viirs",
+      "name": "VIIRS nighttime / thermal products",
+      "kind": "api",
+      "url": "https://firms.modaps.eosdis.nasa.gov/api/area/",
+      "coverage": "Global, thermal anomalies + night lights",
+      "cadence": "near-real-time",
+      "auth": "map-key",
+      "used_by": ["fire_anomaly"]
+    },
+    {
+      "id": "gdelt",
+      "name": "GDELT event feed",
+      "kind": "api",
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc",
+      "coverage": "Global news events, 15-minute rolling",
+      "cadence": "15 min",
+      "auth": "none",
+      "used_by": []
+    },
+    {
+      "id": "overpass",
+      "name": "OpenStreetMap Overpass",
+      "kind": "api",
+      "url": "https://overpass-api.de/api/interpreter",
+      "coverage": "Global OSM features (ports, dams, reservoir polygons)",
+      "cadence": "on query",
+      "auth": "none",
+      "used_by": ["ship_presence", "reservoir_change"]
+    },
+    {
+      "id": "nominatim",
+      "name": "OSM Nominatim geocoder",
+      "kind": "api",
+      "url": "https://nominatim.openstreetmap.org/search",
+      "coverage": "Global place-name -> bbox",
+      "cadence": "on query",
+      "auth": "none",
+      "used_by": ["__freeform__"]
+    }
+  ]
+}

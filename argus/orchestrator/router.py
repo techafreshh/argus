@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 
+from argus.cookbook import recipe_for
 from argus.orchestrator.templates import TEMPLATE_NAMES, TEMPLATES
 
 ANSWER_UNROUTED = "No pipeline covers this."
@@ -44,17 +45,29 @@ def route(question: object) -> dict:
         keywords = entry["keywords"]
         assert isinstance(keywords, tuple)
         if any(hint in text for hint in keywords):
-            adjacent = [other for other in TEMPLATE_NAMES if other != name]
-            return {"template": name, "adjacent": adjacent, "missing": []}
+            return _routed(name, tokens)
         words = entry["words"]
         assert isinstance(words, tuple)
         if words and not tokens.isdisjoint(words):
-            adjacent = [other for other in TEMPLATE_NAMES if other != name]
-            return {"template": name, "adjacent": adjacent, "missing": []}
+            return _routed(name, tokens)
     return {
         "template": None,
         "adjacent": list(ADJACENT_FALLBACK),
         "missing": list(MISSING_GAPS),
+        "recipe_id": None,
+        "recipe_title": None,
+    }
+
+
+def _routed(name: str, tokens: set[str]) -> dict:
+    """Routed result citing the cookbook recipe that backs the template."""
+    recipe = recipe_for(name)
+    return {
+        "template": name,
+        "adjacent": [other for other in TEMPLATE_NAMES if other != name],
+        "missing": [],
+        "recipe_id": name if recipe else None,
+        "recipe_title": str(recipe["title"]) if recipe else None,
     }
 
 

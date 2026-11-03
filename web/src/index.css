@@ -1220,3 +1220,285 @@ textarea[data-beui="input"] {
     @apply font-sans;
   }
 }
+/* ===================== Freeform composer + FAB ===================== */
+.chat-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  gap: 0;
+}
+.chat-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+.composer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  border-top: 1px solid rgb(242 244 248 / 9%);
+  padding-top: 10px;
+  margin-top: 6px;
+}
+.composer-input {
+  flex: 1;
+  resize: none;
+  min-height: 40px;
+  max-height: 140px;
+  line-height: 1.45;
+  font: inherit;
+  border-radius: 10px;
+}
+.composer-send {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.chat-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 55;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 18px 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(242 244 248 / 14%);
+  background: #0a0c11;
+  color: var(--foreground, #eef1f6);
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 34px rgb(0 0 0 / 55%);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.chat-fab:hover {
+  transform: translateY(-2px);
+  border-color: rgb(242 244 248 / 26%);
+  background: #14171e;
+}
+.chat-fab-icon {
+  width: 18px;
+  height: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-fab {
+    transition: none;
+  }
+  .chat-fab:hover {
+    transform: none;
+  }
+}
+
+/* ===================== Onboarding wizard ===================== */
+.wizard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.wizard-card {
+  width: min(680px, 100%);
+  max-height: min(84vh, 760px);
+  overflow-y: auto;
+  background: #06080c;
+  border: 1px solid rgb(242 244 248 / 12%);
+  border-radius: 16px;
+  padding: 26px 28px;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 65%);
+}
+.wizard-steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+.wizard-step {
+  font-size: 12px;
+  color: var(--ink-muted, #a8aec0);
+  border: 1px solid rgb(242 244 248 / 10%);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+.wizard-step.is-current {
+  color: var(--foreground, #eef1f6);
+  border-color: rgb(242 244 248 / 30%);
+}
+.wizard-step.is-done {
+  opacity: 0.55;
+}
+.wizard-body h2 {
+  font-size: 19px;
+  font-weight: 550;
+  margin: 0 0 10px;
+}
+.wizard-lede {
+  color: var(--ink-muted, #a8aec0);
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+.wizard-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ===================== Preset gallery (wizard + watchlist) ===================== */
+.preset-section {
+  margin-bottom: 18px;
+}
+.preset-section h2 {
+  font-size: 15px;
+  font-weight: 550;
+  margin: 0 0 10px;
+}
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.preset-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgb(242 244 248 / 10%);
+  border-radius: 12px;
+  background: #0a0c11;
+  padding: 12px;
+}
+.preset-title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.preset-region {
+  font-size: 12px;
+  color: var(--ink-muted, #a8aec0);
+}
+.preset-blurb {
+  font-size: 12px;
+  color: var(--ink-muted, #a8aec0);
+  line-height: 1.45;
+  flex: 1;
+}
+.preset-start {
+  margin-top: 8px;
+  font-size: 12.5px;
+}
+
+/* ===================== Decision log ===================== */
+.decision-log {
+  border-top: 1px solid rgb(242 244 248 / 9%);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.decision-steps {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.decision-step {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12.5px;
+}
+.decision-tool {
+  font-family: ui-monospace, "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--foreground, #eef1f6);
+  background: #14171e;
+  border: 1px solid rgb(242 244 248 / 10%);
+  border-radius: 6px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+.decision-meta {
+  color: var(--ink-muted, #a8aec0);
+  overflow-wrap: anywhere;
+}
+.decision-deliveries {
+  margin-top: 10px;
+  font-size: 12.5px;
+}
+
+/* ===================== Geospatial toolbox ===================== */
+.toolkit-list {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toolkit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(242 244 248 / 9%);
+  border-radius: 12px;
+  background: #0a0c11;
+  padding: 10px 14px;
+}
+.toolkit-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.toolkit-dot--live {
+  background: #35d49a;
+  box-shadow: 0 0 8px rgb(53 212 154 / 60%);
+}
+.toolkit-dot--stale {
+  background: #e0a33c;
+}
+.toolkit-dot--offline {
+  background: #566073;
+}
+.toolkit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.toolkit-name {
+  font-size: 13.5px;
+  font-weight: 550;
+}
+.toolkit-name a {
+  color: inherit;
+  text-decoration: none;
+}
+.toolkit-name a:hover {
+  text-decoration: underline;
+}
+.toolkit-coverage {
+  font-size: 12px;
+  color: var(--ink-muted, #a8aec0);
+}
+.toolkit-usedby {
+  display: inline-flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.chip-recipe {
+  font-size: 11px;
+}
