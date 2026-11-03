@@ -11,7 +11,7 @@
   [![Meta Model API](https://img.shields.io/badge/Meta%20Model%20API-Muse%20Spark%20%2B%20SAM%203.1-8b5cf6?style=flat-square)](https://dev.meta.ai)
   [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-  [Overview](#overview) · [Architecture](#architecture) · [The eyes](#the-eyes) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Eval gate](#eval-gate) · [Deploy](#deploy) · [API](#api-surface)
+  [Overview](#overview) · [Architecture](#architecture) · [The eyes](#the-eyes) · [Tech stack](#tech-stack) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Eval gate](#eval-gate) · [Deploy](#deploy) · [API](#api-surface)
 </div>
 
 ---
@@ -21,6 +21,9 @@ ARGUS takes a watchlist — regions plus plain-English questions — and runs an
 pulls climate feeds, segments and detects change, cross-checks independent sources, and files
 graded intelligence reports with confidence scores. Alerts queue for human approval; every
 claim carries receipts; every prediction lands in a hit/miss ledger.
+
+And it **remembers you** — conversations, watch definitions, and approval decisions persist
+across sessions (long-term memory via Mem0; gracefully no-ops without a key, or offline).
 
 > [!IMPORTANT]
 > **Meta Global AI Developer Hackathon submission — live at [argus.techa.pro](https://argus.techa.pro) through Nov 8.**
@@ -83,6 +86,21 @@ Both eyes run on the same spine — a second eye proves the design generalizes.
 <div align="center">
   <img src="docs/img/argus-logo.jpg" alt="ARGUS — one hundred eyes, one brief" width="420px" />
 </div>
+
+## Tech stack
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Language | Python 3.12 | single language for the product runtime |
+| API | FastAPI + APScheduler | in-process standing watch (60 s tick), `httpx` adapters |
+| LLM | **Meta Model API** (`api.meta.ai/v1`) | OpenAI-compatible; **Muse Spark 1.3** plans and interprets, **SAM 3.1** does concept-prompt segmentation; spend-capped against the credit budget |
+| Storage | SQLite (WAL) | watches, acquisitions, receipts, alerts, predictions, meta_spend |
+| Memory | **Mem0 Platform** (hosted) | long-term chat memory — ARGUS remembers you: conversations, watch definitions and approval decisions survive sessions; empty key = graceful no-op, offline never egresses |
+| Frontend | Vite + React 19 + MapLibre GL v5 + **beUI** | dark ops room: globe, watchlists, approvals, receipts; static bundle served by FastAPI — no Node runtime deployed |
+| Agent ↔ UI bridge | **CopilotKit** over the **AG-UI protocol** | the chat dock streams plan steps, tool calls and receipts; panels work over plain REST without it |
+| Agent ↔ Earth bridge | typed adapter protocol | 16 typed data adapters behind one `fetch(spec) → TypedResult` interface, tile caching, fixtures/offline mode |
+| Build | **pi coding agent SDK** (build-time only) | executed the implementation briefs; the shipped product never depends on it at runtime |
+| Deploy | Docker + Compose | single `api` service serving API + control room + scheduler; offline demo mode flag |
 
 ## Quickstart
 
