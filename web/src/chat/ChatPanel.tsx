@@ -376,7 +376,7 @@ function ChatInner() {
           onValueChange={setDraft}
           onSubmit={ask}
           loading={busy}
-          minRows={1}
+          minRows={2}
           maxRows={5}
           placeholder="Ask the Earth anything — e.g. is the Niger delta flooding?"
           aria-label="chat question"

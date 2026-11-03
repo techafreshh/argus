@@ -70,6 +70,47 @@ def test_agui_sse_stream_runs_to_finished():
     assert any("run_finished" in frame for frame in frames)
 
 
+def test_agui_sse_greeting_streams_chat_without_machinery():
+    """Greetings get a conversational reply — no plan, no receipts, no watches."""
+    resp = _client().post("/api/ag-ui", json={"question": "Hey"})
+    assert resp.status_code == 200, resp.text
+    assert "text/event-stream" in resp.headers["content-type"]
+    events = _sse_events(resp.text)
+    kinds = [event["type"] for event in events]
+    assert kinds[0] == "run_started"
+    assert "tool_call" not in kinds
+    assert "tool_result" not in kinds
+    message = next(event for event in events if event["type"] == "message")
+    assert "ARGUS" in message["content"], message
+    assert message["kind"] == "app_chat"
+    assert message["template"] is None
+    assert not message["citations"]
+    finished = events[-1]
+    assert finished["type"] == "run_finished"
+    assert finished["ok"] is True
+
+
+def test_agui_sse_capabilities_question_streams_app_tour():
+    resp = _client().post("/api/ag-ui", json={"question": "what can you do for me?"})
+    assert resp.status_code == 200, resp.text
+    events = _sse_events(resp.text)
+    message = next(event for event in events if event["type"] == "message")
+    assert "receipts" in message["content"].lower()
+    assert message["kind"] == "app_chat"
+
+
+def test_agui_sse_greeting_with_question_still_routes():
+    """A greeting piggybacked on a measurement keeps the pipeline routing."""
+    resp = _client().post(
+        "/api/ag-ui",
+        json={"question": "hey, is the Niger delta flooding?", "bbox": [3, 6, 4, 7]},
+    )
+    assert resp.status_code == 200, resp.text
+    events = _sse_events(resp.text)
+    message = next(event for event in events if event["type"] == "message")
+    assert message.get("template") == "flooding", message
+
+
 def _sse_events(text: str) -> list[dict]:
     return [json.loads(line[len("data:"):]) for line in text.splitlines() if line.startswith("data:")]
 

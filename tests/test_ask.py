@@ -97,6 +97,38 @@ def test_ask_empty_question_abstains_with_200():
         assert "No pipeline covers this." in resp.text
 
 
+def test_ask_smalltalk_gets_conversational_reply():
+    """Greetings and app questions chat — no watch rows, no receipts."""
+    for question in ("Hey", "hello there!", "what can you do for me?", "who are you?"):
+        resp = _client().post("/api/ask", json={"question": question})
+        assert resp.status_code == 200, (question, resp.text)
+        body = resp.json()
+        assert "ARGUS" in body["answer"], (question, body)
+        assert body["app_chat"] is True, question
+        assert body["watch_id"] == "", question
+        assert body["receipt_id"] == "", question
+
+
+def test_ask_smalltalk_never_hijacks_measurement_questions():
+    resp = _client().post(
+        "/api/ask", json={"question": "hey, is the Niger delta flooding?"}
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["template"] == "flooding"
+
+
+def test_router_smalltalk_purity_and_bounds():
+    from argus.orchestrator.router import smalltalk_reply
+
+    for question in ("Hi!", "hey there", "what can you do", "who are you", "thanks", "help"):
+        reply = smalltalk_reply(question)
+        assert reply is not None, question
+        assert not any(char.isdigit() for char in reply), question
+    assert smalltalk_reply("Is gold smuggling rising in West Africa?") is None
+    assert smalltalk_reply("What is the price of bitcoin today?") is None
+    assert smalltalk_reply("") is None
+
+
 def test_watch_create_previews_catalog_template():
     resp = _client().post(
         "/api/watches",

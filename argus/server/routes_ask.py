@@ -13,7 +13,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, field_validator
 
 from argus.orchestrator.meta_client import plan as make_plan
-from argus.orchestrator.router import abstain_receipt, route
+from argus.orchestrator.router import abstain_receipt, route, smalltalk_reply
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -179,6 +179,18 @@ def ask(payload: AskIn) -> dict:
                 "plan": plan_dict,
                 "watch_id": watch_id,
                 "receipt_id": receipt["id"],
+            }
+        # Conversational turns get a chat reply; no watch/receipt rows.
+        chat_reply = smalltalk_reply(question)
+        if chat_reply:
+            return {
+                "answer": chat_reply,
+                "missing": [],
+                "adjacent": [],
+                "receipt_id": "",
+                "template": None,
+                "watch_id": "",
+                "app_chat": True,
             }
         watch_id = _insert_watch(question, "unrouted", region, cadence)
         receipt = _insert_receipt(

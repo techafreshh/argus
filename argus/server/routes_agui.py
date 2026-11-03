@@ -28,7 +28,7 @@ from starlette.responses import StreamingResponse
 
 from argus.adapters import geocode, mem0_client
 from argus.orchestrator.meta_client import plan as make_plan
-from argus.orchestrator.router import abstain_receipt, route
+from argus.orchestrator.router import abstain_receipt, route, smalltalk_reply
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -362,6 +362,26 @@ def _run_frames(
         result = route(question)
         template = result.get("template")
         if template is None:
+            # Conversational turns (greetings, app questions) get a chat
+            # reply — no watch row, no receipt, no pipeline frames.
+            chat_reply = smalltalk_reply(question)
+            if chat_reply:
+                _store_run_memory(question, chat_reply, None, "", thread_id)
+                yield _frame(
+                    {
+                        "type": "message",
+                        "role": "assistant",
+                        "content": chat_reply,
+                        "template": None,
+                        "kind": "app_chat",
+                        "watch_id": "",
+                        "receipt_id": "",
+                        "citations": [],
+                        "memories": [],
+                    }
+                )
+                yield _frame({"type": "run_finished", "ok": True, "app_chat": True})
+                return
             info = abstain_receipt(question)
             watch_id = _insert_watch(question, "unrouted", region, cadence)
             _record_geocode(watch_id, geo)
@@ -611,7 +631,10 @@ def _agui_copilot_frames(
         else:
             result = route(question)
             template = result.get("template")
-            if template is None:
+            chat_reply = smalltalk_reply(question) if template is None else None
+            if chat_reply:
+                answer = chat_reply
+            elif template is None:
                 info = abstain_receipt(question)
                 watch_id = _insert_watch(question, "unrouted", region, cadence)
                 receipt = _insert_receipt(
