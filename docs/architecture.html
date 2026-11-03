@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>ARGUS — architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #0d1017; overflow: hidden; }
+  #stage {
+    position: fixed; inset: 0; overflow: hidden;
+    cursor: grab; touch-action: none;
+  }
+  #stage.dragging { cursor: grabbing; }
+  #diagram {
+    position: absolute; top: 0; left: 0;
+    transform-origin: 0 0;
+    user-select: none; -webkit-user-drag: none;
+  }
+  #toolbar {
+    position: fixed; top: 14px; right: 14px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(14, 18, 27, 0.85);
+    border: 1px solid #2e3950; border-radius: 10px;
+    padding: 6px; backdrop-filter: blur(6px);
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  #toolbar button {
+    width: 32px; height: 30px; border: 1px solid #2e3950; border-radius: 7px;
+    background: #142438; color: #cdd7e4; font-size: 16px; line-height: 1;
+    cursor: pointer;
+  }
+  #toolbar button:hover { background: #1b3050; }
+  #zoom {
+    min-width: 52px; text-align: center; color: #93c5fd;
+    font-size: 13px; user-select: none;
+  }
+  #hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    color: #8b98ab; font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 12px; background: rgba(14, 18, 27, 0.85);
+    border: 1px solid #2e3950; border-radius: 8px; padding: 6px 12px;
+    pointer-events: none; transition: opacity 1s;
+    white-space: nowrap;
+  }
+  #fallback { display: none; padding: 40px; color: #8b98ab;
+    font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+  <div id="stage"><img id="diagram" src="./architecture.png" alt="ARGUS architecture diagram" /></div>
+
+  <div id="toolbar">
+    <button id="out" title="Zoom out (&minus;)">&minus;</button>
+    <span id="zoom">100%</span>
+    <button id="in" title="Zoom in (+)">+</button>
+    <button id="reset" title="Reset view" style="width:auto;padding:0 10px;font-size:12px;">fit</button>
+  </div>
+  <div id="hint">scroll = zoom &middot; drag = pan &middot; double-click = reset &middot; pinch on touch</div>
+  <div id="fallback">architecture.png missing — see <a href="https://github.com/techafreshh/argus">repository</a></div>
+
+<script>
+(() => {
+  const stage = document.getElementById("stage");
+  const img = document.getElementById("diagram");
+  const zoomLabel = document.getElementById("zoom");
+  const hint = document.getElementById("hint");
+
+  let s = 1, x = 0, y = 0;      // scale + translate (screen px)
+  let fit = 1, sMin = 0.05, sMax = 30;
+  let vw = 0, vh = 0;
+
+  function apply() {
+    img.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    zoomLabel.textContent = Math.round((s / fit) * 100) + "%";
+  }
+  function clamp() {
+    s = Math.min(sMax, Math.max(sMin, s));
+    // keep content on screen: never let it be dragged fully away
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    x = Math.min(0, Math.max(vw - w, x));
+    y = Math.min(0, Math.max(vh - h, y));
+    if (w < vw) x = (vw - w) / 2;
+    if (h < vh) y = (vh - h) / 2;
+  }
+  function doFit() {
+    if (!img.naturalWidth) return;
+    vw = innerWidth; vh = innerHeight;
+    fit = Math.min(vw / img.naturalWidth, vh / img.naturalHeight) * 0.96;
+    sMin = fit * 0.25;
+    s = fit;
+    x = (vw - img.naturalWidth * fit) / 2;
+    y = (vh - img.naturalHeight * fit) / 2;
+    apply();
+  }
+  function zoomAt(cx, cy, factor) {
+    const ns = Math.min(sMax, Math.max(sMin, s * factor));
+    factor = ns / s;
+    x = cx - (cx - x) * factor;
+    y = cy - (cy - y) * factor;
+    s = ns;
+    clamp();
+    apply();
+  }
+
+  img.addEventListener("load", doFit);
+  addEventListener("resize", () => { doFit(); });
+
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0018));
+  }, { passive: false });
+
+  const pointers = new Map();
+  let pinchDist = 0;
+
+  stage.addEventListener("pointerdown", (e) => {
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+    stage.classList.add("dragging");
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    const prev = pointers.get(e.pointerId);
+    if (pointers.size === 1) {
+      x += e.clientX - prev.x;
+      y += e.clientY - prev.y;
+      clamp();
+      apply();
+    } else if (pointers.size === 2) {
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchDist > 0) {
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        zoomAt(mx, my, d / pinchDist);
+      }
+      pinchDist = d;
+      return;
+    }
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  });
+  const endPointer = (e) => {
+    pointers.delete(e.pointerId);
+    pinchDist = 0;
+    if (pointers.size === 0) stage.classList.remove("dragging");
+  };
+  stage.addEventListener("pointerup", endPointer);
+  stage.addEventListener("pointercancel", endPointer);
+
+  stage.addEventListener("dblclick", doFit);
+  document.getElementById("in").onclick = () => zoomAt(vw / 2, vh / 2, 1.3);
+  document.getElementById("out").onclick = () => zoomAt(vw / 2, vh / 2, 1 / 1.3);
+  document.getElementById("reset").onclick = doFit;
+
+  img.addEventListener("error", () => {
+    document.getElementById("fallback").style.display = "block";
+    stage.style.display = "none";
+    document.getElementById("toolbar").style.display = "none";
+    hint.style.display = "none";
+  });
+
+  // fade the hint after a few seconds
+  setTimeout(() => (hint.style.opacity = "0"), 6000);
+
+  if (img.complete && img.naturalWidth) doFit();
+})();
+</script>
+</body>
+</html>

@@ -13,9 +13,17 @@ import ToolboxPage from "./pages/ToolboxPage";
 import ChannelsPage from "./pages/ChannelsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
-/** The control room: one shell, one page per beat of the demo. */
+import { GateSplash, SignInScreen, useAppGate } from "@/auth/AuthGate";
+
+/** The control room: one shell, one page per beat of the demo. When the
+ * GitHub gate is armed, the room only mounts for a signed-in operator. */
 export default function App() {
 	const { pathname } = useLocation();
+	const gate = useAppGate();
+
+	if (gate === "pending") return <GateSplash />;
+	if (gate === "signin") return <SignInScreen />;
+
 	return (
 		<EnsoProvider>
 			<AppShell pathname={pathname}>

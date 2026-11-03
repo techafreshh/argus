@@ -277,6 +277,16 @@ export interface Preset {
   bbox: [number, number, number, number];
 }
 
+export interface AuthStatus {
+  enabled: boolean;
+  user: { login: string; avatar: string } | null;
+}
+
+export async function authStatus(): Promise<AuthStatus> {
+  // The status route is open by design: it answers 200 signed-in or not.
+  return checked<AuthStatus>(await fetch("/api/auth/status"));
+}
+
 export interface Channel {
   id: string;
   kind: string;
