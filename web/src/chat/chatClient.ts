@@ -91,7 +91,11 @@ export async function streamChat(
     } catch {
       /* fall through to generic error */
     }
-    onEvent(errorFinish(`chat unavailable: HTTP ${res.status}`));
+    onEvent(
+      res.status === 401
+        ? errorFinish("Sign in with GitHub to run pipeline actions.")
+        : errorFinish(`chat unavailable: HTTP ${res.status}`),
+    );
     return;
   }
   if (!res.body) {

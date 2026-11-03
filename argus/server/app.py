@@ -12,6 +12,7 @@ from argus.scheduler.cadence import start_scheduler, stop_scheduler
 from argus.server.routes_agui import router as agui_router
 from argus.server.routes_alerts import router as alerts_router
 from argus.server.routes_ask import router as ask_router
+from argus.server.routes_auth import router as auth_router
 from argus.server.routes_channels import router as channels_router
 from argus.server.routes_enso import router as enso_router
 from argus.server.routes_eval import router as eval_router
@@ -41,6 +42,7 @@ app = FastAPI(title="ARGUS", lifespan=lifespan)
 init_db()
 
 app.include_router(spend_router)
+app.include_router(auth_router)
 app.include_router(watches_router)
 app.include_router(verify_router)
 app.include_router(ask_router)

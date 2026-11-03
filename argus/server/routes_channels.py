@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
 
 from argus.adapters import webhook_client
+from argus.server.routes_auth import require_user
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -65,7 +66,7 @@ def list_channels() -> list[dict]:
 
 
 @router.post("/api/channels")
-def create_channel(payload: ChannelIn) -> dict:
+def create_channel(payload: ChannelIn, _user: dict = Depends(require_user)) -> dict:
     """Register a webhook channel; watch_id omitted = global."""
     init_db()
     channel_id = uuid.uuid4().hex
@@ -94,7 +95,7 @@ def create_channel(payload: ChannelIn) -> dict:
 
 
 @router.delete("/api/channels/{channel_id}")
-def delete_channel(channel_id: str) -> dict:
+def delete_channel(channel_id: str, _user: dict = Depends(require_user)) -> dict:
     """Deactivate-and-remove a channel; past deliveries stay in the ledger."""
     init_db()
     conn = get_connection()
@@ -109,7 +110,7 @@ def delete_channel(channel_id: str) -> dict:
 
 
 @router.post("/api/channels/{channel_id}/test")
-def test_channel(channel_id: str) -> dict:
+def test_channel(channel_id: str, _user: dict = Depends(require_user)) -> dict:
     """Fire a signed test payload at one channel; records the delivery."""
     init_db()
     conn = get_connection()

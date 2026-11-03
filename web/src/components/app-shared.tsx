@@ -51,3 +51,19 @@ export const navGroups: SidebarNavGroup[] = [
 ];
 
 export const navLinks: SidebarNavItem[] = navGroups.flatMap((group) => group.items);
+
+/** Call to action when a gated pipeline action 401s: GitHub sign-in and a
+ * bounce back to the room. Renders even while auth is disabled — GitHub
+ * answers 404 and the room keeps working, so the CTA is only exposed where
+ * a 401 actually happened. */
+export function GitHubSignInCta({ next = "/" }: { next?: string }) {
+	return (
+		<a
+			className="btn btn--primary"
+			data-testid="github-signin"
+			href={`/api/auth/login?next=${encodeURIComponent(next)}`}
+		>
+			Sign in with GitHub
+		</a>
+	);
+}

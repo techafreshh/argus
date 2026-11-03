@@ -7,12 +7,13 @@ import json
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from argus.adapters import mem0_client
 from argus.reports.ledger import log_prediction
 from argus.reports.render import file_report
 from argus.server.deliver_alert import dispatch_alert
+from argus.server.routes_auth import require_user
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -166,7 +167,7 @@ def _file_report_for_alert(alert: dict) -> dict:
 
 
 @router.post("/api/alerts/{alert_id}/approve")
-def approve_alert(alert_id: str) -> dict:
+def approve_alert(alert_id: str, _user: dict = Depends(require_user)) -> dict:
     """Approve a queued alert; it becomes its own report (report_id = alert id)."""
     init_db()
     row = _get_alert_or_404(alert_id)
@@ -213,7 +214,7 @@ def approve_alert(alert_id: str) -> dict:
 
 
 @router.post("/api/alerts/{alert_id}/reject")
-def reject_alert(alert_id: str) -> dict:
+def reject_alert(alert_id: str, _user: dict = Depends(require_user)) -> dict:
     """Reject a queued alert; rejected alerts never become reports."""
     init_db()
     row = _get_alert_or_404(alert_id)

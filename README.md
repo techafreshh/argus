@@ -7,7 +7,9 @@ loop: **plan → acquire → analyze → verify → alert**. It plans its own sa
 acquisitions, pulls climate feeds, segments and detects change, cross-checks independent
 sources, and files graded intelligence reports with confidence scores. Alerts queue for
 human approval; every claim carries receipts; every prediction lands in a hit/miss ledger.
-Chat carries long memory via [Mem0](https://mem0.ai) — conversations, watch definitions,
+State-changing pipeline actions are gated behind a GitHub sign-in when
+`ARGUS_GITHUB_*` keys are set (reads stay open); the key setup is in
+`.env.example`. Chat carries long memory via [Mem0](https://mem0.ai) — conversations, watch definitions,
 and approval decisions survive across sessions (graceful no-op without a key or offline).
 
 Freeform by design: ask in plain language — place names resolve to regions through the

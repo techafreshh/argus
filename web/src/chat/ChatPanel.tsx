@@ -21,6 +21,7 @@ import { TodoList } from "@/components/agents/todo-list";
 import { ToolResult } from "@/components/agents/tool-result";
 import { ThinkingShimmer } from "@/components/agents/loading-states/thinking-shimmer";
 import { approveAlert, listAlerts, rejectAlert } from "../api";
+import { GitHubSignInCta } from "../components/app-shared";
 import { LogoIcon } from "../components/logo";
 import { streamChat, type AguiEvent, type AguiMemory } from "./chatClient";
 
@@ -236,6 +237,7 @@ function ChatInner({ initialQuestion }: { initialQuestion?: string | null }) {
               );
             }
             if (row.kind === "error") {
+              const needsAuth = row.text.includes("Sign in with GitHub");
               return (
                 <Message key={i} from="assistant">
                   <MessageAvatar className="bg-destructive/15 text-destructive">
@@ -248,6 +250,11 @@ function ChatInner({ initialQuestion }: { initialQuestion?: string | null }) {
                       <span className="tabular-nums">{row.ts}</span>
                     </MessageHeader>
                     <MessageBubble variant="danger">{row.text}</MessageBubble>
+                    {needsAuth && (
+                      <div className="mt-1">
+                        <GitHubSignInCta />
+                      </div>
+                    )}
                   </MessageContent>
                 </Message>
               );

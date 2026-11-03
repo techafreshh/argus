@@ -28,5 +28,9 @@ packages = ["argus"]
 [tool.ruff]
 target-version = "py312"
 
+[tool.ruff.lint]
+# B008: function-call-in-default is how FastAPI dependency injection works.
+ignore = ["B008"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

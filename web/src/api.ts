@@ -67,9 +67,22 @@ async function asJson(res: Response): Promise<unknown> {
   }
 }
 
+/** Raised when a gated pipeline action needs a GitHub sign-in. */
+export class AuthError extends Error {
+  constructor() {
+    super("Sign in with GitHub to run pipeline actions.");
+    this.name = "AuthError";
+  }
+}
+
+export function isAuthError(err: unknown): boolean {
+  return err instanceof Error && err.message.includes("Sign in with GitHub");
+}
+
 async function checked<T>(res: Response): Promise<T> {
   const body = (await asJson(res)) as T;
   if (!res.ok) {
+    if (res.status === 401) throw new AuthError();
     throw new Error(`HTTP ${res.status}: ${JSON.stringify(body)}`);
   }
   return body;

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "../beui";
 import { PageHeader } from "../shell/page-header";
 import BboxPicker, { type Bbox } from "../components/map/BboxPicker";
+import { GitHubSignInCta } from "../components/app-shared";
 import {
 	createWatch,
 	getPresets,
@@ -261,6 +262,7 @@ function WatchlistManager({ onChanged }: { onChanged: () => void }) {
 					{status}
 				</p>
 			)}
+			{failed && status.includes("Sign in with GitHub") && <GitHubSignInCta /> }
 		</section>
 	);
 }

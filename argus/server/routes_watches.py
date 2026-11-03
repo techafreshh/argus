@@ -10,7 +10,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field, field_validator
 
 from argus.adapters import mem0_client
@@ -22,6 +22,7 @@ from argus.orchestrator.loop import run_watch as loop_run_watch
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.planner import match_template
 from argus.orchestrator.router import route as route_question
+from argus.server.routes_auth import require_user
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -295,7 +296,7 @@ def _get_watch_or_404(watch_id: str) -> Any:
 
 
 @router.post("/api/watches")
-def create_watch(payload: WatchIn, response: Response) -> dict:
+def create_watch(payload: WatchIn, response: Response, _user: dict = Depends(require_user)) -> dict:
     """Create a watch; stores the matched template plus the initial Plan."""
     init_db()
     template = (payload.template or "").strip() or (
@@ -391,7 +392,7 @@ def get_watch(watch_id: str) -> dict:
 
 
 @router.delete("/api/watches/{watch_id}")
-def delete_watch(watch_id: str) -> dict:
+def delete_watch(watch_id: str, _user: dict = Depends(require_user)) -> dict:
     """Remove a watch and its acquisitions/receipts; 404 when absent."""
     init_db()
     _get_watch_or_404(watch_id)
@@ -409,7 +410,7 @@ def delete_watch(watch_id: str) -> dict:
 
 
 @router.post("/api/watches/{watch_id}/run")
-def run_watch(watch_id: str) -> dict:
+def run_watch(watch_id: str, _user: dict = Depends(require_user)) -> dict:
     """Run the Plan -> acquire -> receipt loop for a watch (manual demo beat)."""
     init_db()
     row = _get_watch_or_404(watch_id)

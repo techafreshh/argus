@@ -9,11 +9,12 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, field_validator
 
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.router import abstain_receipt, route, smalltalk_reply
+from argus.server.routes_auth import require_user
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -143,7 +144,7 @@ def _abstain_response(watch_id: str, receipt_id: str) -> dict:
 
 
 @router.post("/api/ask")
-def ask(payload: AskIn) -> dict:
+def ask(payload: AskIn, _user: dict = Depends(require_user)) -> dict:
     """Route a plain-English question to a pipeline or honestly abstain."""
     try:
         init_db()

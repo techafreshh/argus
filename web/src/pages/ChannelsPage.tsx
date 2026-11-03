@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { TestTube2Icon, Trash2Icon, WebhookIcon } from "lucide-react";
 import { Card } from "../beui";
+import { GitHubSignInCta } from "../components/app-shared";
 import { PageHeader } from "../shell/page-header";
 import {
 	createChannel,
@@ -177,6 +178,7 @@ export default function ChannelsPage() {
 							{note}
 						</p>
 					)}
+						{failed && note.includes("Sign in with GitHub") && <GitHubSignInCta />}
 				</section>
 			</Card>
 		</div>

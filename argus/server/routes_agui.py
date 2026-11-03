@@ -21,7 +21,7 @@ from collections.abc import Iterator
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 from starlette.responses import StreamingResponse
@@ -29,6 +29,7 @@ from starlette.responses import StreamingResponse
 from argus.adapters import geocode, mem0_client
 from argus.orchestrator.meta_client import plan as make_plan
 from argus.orchestrator.router import abstain_receipt, route, smalltalk_reply
+from argus.server.routes_auth import require_user
 from argus.store.db import get_connection, init_db
 
 router = APIRouter()
@@ -531,7 +532,7 @@ def agui_descriptor():
 
 
 @router.post("/api/ag-ui")
-def agui_run(payload: AguiIn):
+def agui_run(payload: AguiIn, _user: dict = Depends(require_user)):
     """Stream an orchestrator run as SSE ``data: {json}`` frames."""
     if _chat_disabled():
         return JSONResponse(status_code=200, content=_disabled_payload())
@@ -759,6 +760,7 @@ async def copilot_handshake_post(request: Request):
     except Exception:  # noqa: BLE001 - empty/invalid JSON keeps the handshake
         body = None
     if _looks_like_run_body(body):
+        require_user(request)
         return _copilot_stream(body)
     return _copilot_handshake()
 
@@ -782,7 +784,7 @@ def _unknown_copilot_agent(agent_id: str) -> JSONResponse:
 
 
 @router.post("/api/copilot/agent/{agent_id}/run")
-async def copilot_agent_run(agent_id: str, request: Request):
+async def copilot_agent_run(agent_id: str, request: Request, _user: dict = Depends(require_user)):
     """Start a CopilotKit agent run as an SSE stream of AG-UI events."""
     if _chat_disabled():
         return JSONResponse(status_code=200, content=_disabled_payload())
@@ -796,7 +798,7 @@ async def copilot_agent_run(agent_id: str, request: Request):
 
 
 @router.post("/api/copilot/agent/{agent_id}/connect")
-async def copilot_agent_connect(agent_id: str, request: Request):
+async def copilot_agent_connect(agent_id: str, request: Request, _user: dict = Depends(require_user)):
     """Reconnect stub: a short valid SSE run ending in RUN_FINISHED."""
     if _chat_disabled():
         return JSONResponse(status_code=200, content=_disabled_payload())
@@ -824,7 +826,7 @@ async def copilot_agent_connect(agent_id: str, request: Request):
 
 
 @router.post("/api/copilot/agent/{agent_id}/stop/{thread_id}")
-def copilot_agent_stop(agent_id: str, thread_id: str):
+def copilot_agent_stop(agent_id: str, thread_id: str, _user: dict = Depends(require_user)):
     """Stop stub: nothing runs in the background, so stopping is trivially ok."""
     if _chat_disabled():
         return JSONResponse(status_code=200, content=_disabled_payload())

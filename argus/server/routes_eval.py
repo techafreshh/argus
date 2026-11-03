@@ -12,11 +12,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from argus.eval.probes import run_eval
 from argus.orchestrator.meta_client import spend_total
 from argus.reports.ledger import get_precision
+from argus.server.routes_auth import require_user
 from argus.store.db import init_db
 
 router = APIRouter()
@@ -43,7 +44,7 @@ def _legacy_status() -> dict:
 
 
 @router.post("/api/eval/run")
-def run_eval_route() -> dict:
+def run_eval_route(_user: dict = Depends(require_user)) -> dict:
     """Execute all honesty-gate probes synchronously; return run_id."""
     init_db()
     try:
